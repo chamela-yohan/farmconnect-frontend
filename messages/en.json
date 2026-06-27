@@ -4,6 +4,30 @@
     "subtitle": "Fresh from the farm to your table."
   },
   "common": {
+    "email": "Email Address",
+    "password": "Password",
+    "fullName": "Full Name",
+    "mobileNumber": "Mobile Number",
     "changeLanguage": "Change Language"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to connect with local farmers.",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create one here"
+    },
+   "register": {
+      "title": "Join FarmConnect",
+      "subtitle": "Create your account to start trading.",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "roleLabel": "I want to join as a...",
+      "buyer": "Buyer",
+      "farmer": "Farmer",
+      "confirmPassword": "Confirm Password"
+    }
   }
 }

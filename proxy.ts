@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 // Initialize the next-intl middleware
 const intlMiddleware = createMiddleware(routing);
 
-// ✅ Next.js 16 requires the exported function to be named 'proxy'
+// Next.js 16 requires the exported function to be named 'proxy'
 export default function proxy(request: NextRequest) {
   return intlMiddleware(request);
 }
