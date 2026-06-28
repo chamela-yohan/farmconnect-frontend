@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import '@/lib/suppressWarnings';
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +17,7 @@ export default async function RootLayout({
   params
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>; 
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
 
@@ -23,15 +25,20 @@ export default async function RootLayout({
     notFound();
   }
 
-  // Fetch messages for the current locale
   const messages = await getMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className="antialiased">
-        {/* Provide translations to all Client Components */}
+      <body className="antialiased bg-background text-foreground min-h-screen">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ThemeProvider
+           // attribute="class"
+            defaultTheme="system"
+          //  enableSystem
+           // disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

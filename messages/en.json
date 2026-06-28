@@ -29,5 +29,13 @@
       "farmer": "Farmer",
       "confirmPassword": "Confirm Password"
     }
+  },
+    "nav": {
+    "home": "Home",
+    "orders": "Orders",
+    "chat": "Chat",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "products": "Products"
   }
 }
