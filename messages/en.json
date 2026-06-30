@@ -1,7 +1,8 @@
 {
   "home": {
-    "title": "Welcome to FarmConnect",
-    "subtitle": "Fresh from the farm to your table."
+    "title": "Fresh from Local Farms",
+    "subtitle": "Discover quality produce from farmers near you",
+    "error": "Failed to load products. Please try again."
   },
   "common": {
     "email": "Email Address",
@@ -46,5 +47,53 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "products": "Products"
+  },
+
+  "products": {
+    "search": {
+      "placeholder": "Search products..."
+    },
+    "detail": {
+      "back": "Back to products",
+      "backToHome": "Back to home",
+      "notFound": "Product not found",
+      "availability": "Availability",
+      "inStock": "in stock",
+      "outOfStock": "Out of stock",
+      "soldBy": "Sold by",
+      "reviews": "reviews",
+      "away": "away",
+      "addToCart": "Add to Cart",
+      "farmerNotAvailable": "Seller information not available"
+    },
+    "filters": {
+      "button": "Filters",
+      "category": "Category",
+      "sortBy": "Sort by",
+      "all": "All",
+      "default": "Default",
+      "priceLowToHigh": "Price: Low to High",
+      "priceHighToLow": "Price: High to Low",
+      "newest": "Newest First",
+      "nearest": "Nearest First",
+      "clear": "Clear Filters",
+      "location": "Location",
+      "useMyLocation": "Use My Location",
+      "usingCurrentLocation": "Using current location",
+      "gettingLocation": "Getting location...",
+      "updating": "Updating...",
+      "refresh": "Refresh",
+      "searchRadius": "Search radius"
+    },
+    "card": {
+      "addToCart": "Add to Cart",
+      "unknownFarmer": "Unknown Seller",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "empty": {
+      "title": "No products found",
+      "description": "Try adjusting your filters or search terms"
+    }
   }
 }
