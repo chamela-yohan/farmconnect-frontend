@@ -1,10 +1,12 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: 'BUYER' | 'FARMER';
+  role: "BUYER" | "FARMER";
+  profilePictureUrl?: string;
+  profileComplete: boolean;
 }
 
 interface AuthState {
@@ -18,28 +20,28 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  
+
   login: (user, token) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('accessToken', token);
-      localStorage.setItem('user', JSON.stringify(user)); // ✅ Save user data too
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("user", JSON.stringify(user)); // ✅ Save user data too
     }
     set({ user, isAuthenticated: true });
   },
-  
+
   logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
     }
     set({ user: null, isAuthenticated: false });
   },
 
   // Reload state from localStorage when the app starts
   hydrate: () => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      const userStr = localStorage.getItem('user');
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("accessToken");
+      const userStr = localStorage.getItem("user");
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
@@ -49,5 +51,5 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
       }
     }
-  }
+  },
 }));

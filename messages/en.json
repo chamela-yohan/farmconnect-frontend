@@ -16,9 +16,10 @@
       "subtitle": "Sign in to connect with local farmers.",
       "submit": "Sign In",
       "noAccount": "Don't have an account?",
-      "registerLink": "Create one here"
+      "registerLink": "Create one here",
+      "orContinueWith": "Or continue with"
     },
-   "register": {
+    "register": {
       "title": "Join FarmConnect",
       "subtitle": "Create your account to start trading.",
       "submit": "Create Account",
@@ -30,7 +31,15 @@
       "confirmPassword": "Confirm Password"
     }
   },
-    "nav": {
+  "profile": {
+    "complete": {
+      "title": "Complete Your Profile",
+      "subtitle": "We need a few more details to get you started.",
+      "roleLabel": "I want to join as a...",
+      "submit": "Complete Profile"
+    }
+  },
+  "nav": {
     "home": "Home",
     "orders": "Orders",
     "chat": "Chat",

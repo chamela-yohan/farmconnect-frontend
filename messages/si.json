@@ -16,7 +16,8 @@
       "subtitle": "දේශීය ගොවීන් සමඟ සම්බන්ධ වීමට පිවිසෙන්න.",
       "submit": "පිවිසෙන්න",
       "noAccount": "ගිණුමක් නැද්ද?",
-      "registerLink": "මෙතැනින් ගිණුමක් සාදන්න"
+      "registerLink": "මෙතැනින් ගිණුමක් සාදන්න",
+       "orContinueWith": "Or"
     },
     "register": {
       "title": "FarmConnect සමඟ එක්වන්න",
