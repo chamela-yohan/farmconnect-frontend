@@ -42,11 +42,12 @@ export default function LoginPage() {
     setApiError("");
     try {
       const response = await api.post("/auth/login", data);
-      const { accessToken, user } = response.data.data;
+      const { accessToken, refreshToken, user } = response.data.data;
 
-      login(user, accessToken);
+      // ✅ Pass BOTH tokens to the store
+      login(user, accessToken, refreshToken);
 
-      //  Check if profile is complete
+      // Check if profile is complete
       if (!user.profileComplete) {
         router.push(`/${locale}/complete-profile`);
       } else {
@@ -66,6 +67,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-8">
       <div className="w-full max-w-md space-y-8">

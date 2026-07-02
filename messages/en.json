@@ -38,7 +38,17 @@
       "subtitle": "We need a few more details to get you started.",
       "roleLabel": "I want to join as a...",
       "submit": "Complete Profile"
-    }
+    },
+    "title": "Profile Settings",
+    "uploadPicture": "Upload Profile Picture",
+    "name": "Full Name",
+    "mobile": "Mobile Number",
+    "city": "City",
+    "address": "Address",
+    "farmLocation": "Farm Location",
+    "mapHint": "Click on the map to set your farm location",
+    "saving": "Saving...",
+    "save": "Save Changes"
   },
   "nav": {
     "home": "Home",

@@ -1,35 +1,35 @@
 "use client";
 
-import { Product } from '@/types/product';
-import { Star, MapPin, ShoppingCart, Play } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
-import Image from 'next/image';
-import Link from 'next/link';
+import { Product } from "@/types/product";
+import { Star, MapPin, ShoppingCart, Play } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const t = useTranslations('products');
-  const locale = useLocale();  // ✅ Get current locale
+  const t = useTranslations("products");
+  const locale = useLocale();
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-LK', {
-      style: 'currency',
-      currency: 'LKR',
+    return new Intl.NumberFormat("en-LK", {
+      style: "currency",
+      currency: "LKR",
       minimumFractionDigits: 0,
     }).format(price);
   };
 
-  // Get first image or use placeholder
   const primaryImage = product.imageUrls?.[0];
   const hasVideo = !!product.videoUrl;
   const totalMediaCount = (product.imageUrls?.length || 0) + (hasVideo ? 1 : 0);
 
+
   return (
     <Link
-      href={`/${locale}/products/${product.id}`}  // ✅ Add locale to URL
+      href={`/${locale}/products/${product.id}`}
       className="group block bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
     >
       {/* Image Container */}
@@ -41,6 +41,15 @@ export function ProductCard({ product }: ProductCardProps) {
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = "none";
+              const placeholder = document.createElement("div");
+              placeholder.className =
+                "w-full h-full bg-muted flex items-center justify-center";
+              placeholder.innerHTML = '<span class="text-6xl">🥬</span>';
+              target.parentElement?.appendChild(placeholder);
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -64,35 +73,38 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Stock Badge */}
-        {product.availableStock && product.availableStock < 10 && product.availableStock > 0 && (
-          <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-medium px-2 py-1 rounded-full">
-            {t('card.lowStock')}
-          </div>
-        )}
+        {product.availableStock &&
+          product.availableStock < 10 &&
+          product.availableStock > 0 && (
+            <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-medium px-2 py-1 rounded-full">
+              {t("card.lowStock")}
+            </div>
+          )}
 
         {(!product.availableStock || product.availableStock === 0) && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <span className="text-destructive font-semibold">{t('card.outOfStock')}</span>
+            <span className="text-destructive font-semibold">
+              {t("card.outOfStock")}
+            </span>
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        {/* Title */}
         <div>
           <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {product.title}
           </h3>
         </div>
 
-        {/* Price */}
         <div className="flex items-baseline gap-1">
-          <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
+          <span className="text-lg font-bold text-primary">
+            {formatPrice(product.price)}
+          </span>
           <span className="text-xs text-muted-foreground">/ kg</span>
         </div>
 
-        {/* Farmer Info */}
         <div className="flex items-center gap-2 pt-2 border-t border-border">
           <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-medium text-primary">
@@ -112,17 +124,16 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart Button */}
         <button
           onClick={(e) => {
             e.preventDefault();
-            console.log('Add to cart:', product.id);
+            console.log("Add to cart:", product.id);
           }}
           disabled={!product.availableStock || product.availableStock === 0}
           className="w-full mt-2 h-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ShoppingCart className="w-4 h-4" />
-          <span className="text-sm font-medium">{t('card.addToCart')}</span>
+          <span className="text-sm font-medium">{t("card.addToCart")}</span>
         </button>
       </div>
     </Link>

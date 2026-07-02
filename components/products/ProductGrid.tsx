@@ -7,7 +7,7 @@ import { EmptyState } from './EmptyState';
 
 interface ProductGridProps {
   products: Product[];
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
 export function ProductGrid({ products, isLoading }: ProductGridProps) {

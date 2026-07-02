@@ -57,7 +57,9 @@ export const useProducts = (filters: ProductFilter = {}) => {
   return useQuery({
     queryKey: ['products', filters],
     queryFn: () => fetchProducts(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 30, // Refresh every 30 minutes (before URLs expire)
+    gcTime: 1000 * 60 * 60,    // Keep in cache for 1 hour
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 };
 
