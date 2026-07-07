@@ -78,22 +78,28 @@
     },
     "filters": {
       "button": "Filters",
-      "category": "Category",
-      "sortBy": "Sort by",
+      "productType": "Product Type",
       "all": "All",
+      "physicalGoods": "Products",
+      "rentable": "Rentals",
+      "services": "Services",
+      "location": "Location",
+      "useMyLocation": "Use My Location",
+      "usingCurrentLocation": "Using current location",
+      "updating": "Updating...",
+      "refresh": "Refresh",
+      "gettingLocation": "Getting location...",
+      "searchRadius": "Search radius",
+      "category": "Category",
+      "priceRange": "Price Range",
+      "deliveryAvailable": "Delivery available",
+      "sortBy": "Sort by",
       "default": "Default",
       "priceLowToHigh": "Price: Low to High",
       "priceHighToLow": "Price: High to Low",
       "newest": "Newest First",
       "nearest": "Nearest First",
-      "clear": "Clear Filters",
-      "location": "Location",
-      "useMyLocation": "Use My Location",
-      "usingCurrentLocation": "Using current location",
-      "gettingLocation": "Getting location...",
-      "updating": "Updating...",
-      "refresh": "Refresh",
-      "searchRadius": "Search radius"
+      "clear": "Clear Filters"
     },
     "card": {
       "addToCart": "Add to Cart",
@@ -104,6 +110,56 @@
     "empty": {
       "title": "No products found",
       "description": "Try adjusting your filters or search terms"
+    },
+    "myProducts": {
+      "title": "My Products",
+      "totalProducts": "products",
+      "addProduct": "Add Product",
+      "noProducts": "No products yet",
+      "noProductsDescription": "Start by adding your first product",
+      "addFirstProduct": "Add Your First Product"
+    },
+     "add": {
+      "title": "Add New Product",
+      "step1": "Product Details & Images",
+      "step2": "Review & Submit",
+      "successMessage": "Product added successfully!"
+    },
+    "form": {
+      "productType": "Product Type",
+      "physicalGood": "Physical Good",
+      "rentable": "Rentable",
+      "service": "Service",
+      "title": "Title",
+      "description": "Description",
+      "price": "Price",
+      "availableStock": "Available Stock",
+      "unit": "Unit",
+      "rentalPricePerDay": "Rental Price/Day",
+      "depositAmount": "Deposit Amount",
+      "minRentalDays": "Min Rental Days",
+      "maxRentalDays": "Max Rental Days",
+      "serviceDurationHours": "Service Duration (Hours)",
+      "deliveryAvailable": "I can deliver this product",
+      "deliveryFee": "Delivery Fee",
+      "images": "Product Images",
+      "video": "Product Video",
+      "next": "Continue to Review"
+    },
+     "review": {
+      "title": "Review Your Product",
+      "productType": "Product Type",
+      "description": "Description",
+      "price": "Price",
+      "stock": "Available Stock",
+      "rentalPrice": "Rental Price",
+      "deposit": "Deposit",
+      "duration": "Duration",
+      "delivery": "Delivery",
+      "images": "Images",
+      "video": "Video",
+      "back": "Back",
+      "submit": "Submit Product"
     }
   }
 }

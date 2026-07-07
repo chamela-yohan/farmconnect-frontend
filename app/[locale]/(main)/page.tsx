@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useProducts } from '@/lib/api/products';
 import { ProductGrid } from '@/components/products/ProductGrid';
@@ -15,27 +15,31 @@ export default function HomePage() {
   const [filters, setFilters] = useState<ProductFilter>({
     page: 0,
     size: 12,
-    latitude: location?.latitude,
-    longitude: location?.longitude,
+    // Don't set lat/lon initially - let user choose
+    // latitude: location?.latitude,
+    // longitude: location?.longitude,
     radiusKm: 50,
   });
 
-  const { data: productPage, isLoading, refetch } = useProducts(filters);
+  const { data: productPage, isLoading, refetch, error } = useProducts(filters);
 
-  // ✅ Force refetch on mount to get fresh presigned URLs
+  // Debug logging
   useEffect(() => {
-    const timer = setTimeout(() => {
-      refetch();
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [refetch]);
+    console.log('Products loaded:', productPage?.content?.length);
+    if (productPage?.content?.[0]) {
+      console.log('First product:', {
+        title: productPage.content[0].title,
+        imageUrls: productPage.content[0].imageUrls,
+      });
+    }
+  }, [productPage]);
 
   const handleFilterChange = (newFilters: ProductFilter) => {
     setFilters({
       ...newFilters,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
+      // Only add location if user explicitly requested it
+      latitude: newFilters.latitude || location?.latitude,
+      longitude: newFilters.longitude || location?.longitude,
     });
   };
 
@@ -44,6 +48,17 @@ export default function HomePage() {
       <div className="container px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Error loading products:', error);
+    return (
+      <div className="container px-4 py-8">
+        <div className="text-destructive">
+          Failed to load products. Please try again.
         </div>
       </div>
     );

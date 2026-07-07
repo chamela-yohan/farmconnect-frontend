@@ -2,9 +2,9 @@
 
 import { Search, Filter, X, MapPin, Navigation } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCategories } from '@/lib/api/products';
-import { ProductFilter } from '@/types/product';
+import { ProductFilter, ProductType } from '@/types/product';
 import { useGeolocation } from '@/hooks/useGeolocation';
 
 interface SearchFilterBarProps {
@@ -26,6 +26,10 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
     onFilterChange({ ...filters, category: category || undefined, page: 0 });
   };
 
+  const handleProductTypeChange = (productType: ProductType | undefined) => {
+    onFilterChange({ ...filters, productType: productType, page: 0 });
+  };
+
   const handleSortChange = (sortBy: string) => {
     onFilterChange({ ...filters, sortBy: sortBy as ProductFilter['sortBy'] || undefined, page: 0 });
   };
@@ -34,12 +38,20 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
     onFilterChange({ ...filters, radiusKm: radius || undefined, page: 0 });
   };
 
+  const handlePriceRangeChange = (minPrice?: number, maxPrice?: number) => {
+    onFilterChange({ ...filters, minPrice, maxPrice, page: 0 });
+  };
+
+  const handleDeliveryFilterChange = (isDeliveryAvailable: boolean | undefined) => {
+    onFilterChange({ ...filters, isDeliveryAvailable, page: 0 });
+  };
+
   const handleUseMyLocation = () => {
     requestLocation();
   };
 
   // Update filters when location changes
-  useState(() => {
+  useEffect(() => {
     if (location) {
       onFilterChange({
         ...filters,
@@ -47,7 +59,7 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
         longitude: location.longitude,
       });
     }
-  });
+  }, [location]);
 
   const clearFilters = () => {
     onFilterChange({ 
@@ -58,7 +70,9 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
     });
   };
 
-  const hasActiveFilters = filters.search || filters.category || filters.sortBy || filters.radiusKm;
+  const hasActiveFilters = filters.search || filters.category || filters.productType || 
+                          filters.sortBy || filters.radiusKm || filters.minPrice || 
+                          filters.maxPrice || filters.isDeliveryAvailable !== undefined;
 
   return (
     <div className="space-y-3">
@@ -97,6 +111,55 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
       {/* Expanded Filters */}
       {showFilters && (
         <div className="bg-card border border-border rounded-lg p-4 space-y-4">
+          {/* Product Type Filter */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">
+              {t('filters.productType')}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleProductTypeChange(undefined)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  !filters.productType
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted/80'
+                }`}
+              >
+                {t('filters.all')}
+              </button>
+              <button
+                onClick={() => handleProductTypeChange(ProductType.PHYSICAL_GOOD)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  filters.productType === ProductType.PHYSICAL_GOOD
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted/80'
+                }`}
+              >
+                🍎 {t('filters.physicalGoods')}
+              </button>
+              <button
+                onClick={() => handleProductTypeChange(ProductType.RENTABLE)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  filters.productType === ProductType.RENTABLE
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted/80'
+                }`}
+              >
+                🔧 {t('filters.rentable')}
+              </button>
+              <button
+                onClick={() => handleProductTypeChange(ProductType.SERVICE)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  filters.productType === ProductType.SERVICE
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted/80'
+                }`}
+              >
+                👨‍🌾 {t('filters.services')}
+              </button>
+            </div>
+          </div>
+
           {/* Location Section */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
@@ -188,6 +251,58 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Price Range */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">
+              {t('filters.priceRange')}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={filters.minPrice || ''}
+                  onChange={(e) => handlePriceRangeChange(
+                    e.target.value ? Number(e.target.value) : undefined,
+                    filters.maxPrice
+                  )}
+                  className="w-full h-10 px-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="10000"
+                  value={filters.maxPrice || ''}
+                  onChange={(e) => handlePriceRangeChange(
+                    filters.minPrice,
+                    e.target.value ? Number(e.target.value) : undefined
+                  )}
+                  className="w-full h-10 px-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Filter */}
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.isDeliveryAvailable === true}
+                onChange={(e) => handleDeliveryFilterChange(e.target.checked ? true : undefined)}
+                className="w-4 h-4 rounded border-border"
+              />
+              <span className="text-sm font-medium text-foreground">
+                {t('filters.deliveryAvailable')}
+              </span>
+            </label>
           </div>
 
           {/* Sort */}
