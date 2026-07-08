@@ -130,3 +130,22 @@ export interface Category {
   name: string;
   slug: string;
 }
+
+
+export interface ProductSearchCriteria {
+  keyword?: string;
+  categoryId?: string;
+  productType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  lat?: number;
+  lon?: number;
+  radiusKm?: number;
+  isDeliveryAvailable?:boolean
+  deliveryDistrictId?: number;
+  locationDistrictId?:number;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: 'ASC' | 'DESC';
+}
