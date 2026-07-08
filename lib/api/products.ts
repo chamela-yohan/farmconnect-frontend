@@ -232,6 +232,9 @@ export const useSearchProducts = (
       if (criteria.isDeliveryAvailable)
         params.append("isDeliveryAvailable", "true");
 
+      if (criteria.sortBy) params.append("sortBy", criteria.sortBy);
+      if (criteria.sortDir) params.append("sortDir", criteria.sortDir);
+
       params.append("page", String(criteria.page || 0));
       params.append("size", String(criteria.size || 20));
 
@@ -239,7 +242,6 @@ export const useSearchProducts = (
       return data.data as ProductPage;
     },
     staleTime: 1000 * 60 * 5,
-   
   });
 };
 

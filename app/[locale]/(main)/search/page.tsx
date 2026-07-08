@@ -27,6 +27,9 @@ export default function SearchPage() {
   const locale = useLocale();
   const queryClient = useQueryClient();
 
+  const [sortBy, setSortBy] = useState<string>("created_at");
+  const [sortDir, setSortDir] = useState<string>("DESC");
+
   // --- BASIC FILTERS ---
   const [keyword, setKeyword] = useState("");
   const [productType, setProductType] = useState<string>("");
@@ -166,6 +169,10 @@ export default function SearchPage() {
     radiusKm: lat && lon ? radiusKm : undefined,
     isDeliveryAvailable: isDeliveryAvailable === true ? true : undefined,
     deliveryDistrictId: deliveryDistrictId,
+
+    sortBy: sortBy,
+    sortDir: sortDir as "ASC" | "DESC" | undefined,
+
     page,
     size: pageSize,
   };
@@ -190,6 +197,8 @@ export default function SearchPage() {
     lat,
     lon,
     radiusKm,
+    sortBy,
+    sortDir,
   ]);
 
   const handleClearFilters = () => {
@@ -387,9 +396,11 @@ export default function SearchPage() {
                     onChange={(e) => setUseMyLocation(e.target.checked)}
                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                   />
-                  <span className="text-sm text-foreground">Use my current location</span>
+                  <span className="text-sm text-foreground">
+                    Use my current location
+                  </span>
                 </label>
-                
+
                 {/* Show loading state while GPS is fetching */}
                 {isLocating && (
                   <div className="flex items-center gap-2 text-xs text-primary">
@@ -401,7 +412,9 @@ export default function SearchPage() {
                 {useMyLocation && !isLocating && (
                   <>
                     {locationError ? (
-                      <p className="text-xs text-destructive">{locationError}</p>
+                      <p className="text-xs text-destructive">
+                        {locationError}
+                      </p>
                     ) : (
                       <select
                         value={radiusKm}
@@ -470,23 +483,51 @@ export default function SearchPage() {
             </div>
           ) : data && data.content.length > 0 ? (
             <>
+              {/* ✅ HEADER: Sort By & Results Per Page */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
                 <p className="text-sm text-muted-foreground">
                   Showing {data.content.length} of {data.totalElements} results
                 </p>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-muted-foreground">
-                    Results per page:
-                  </label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="h-8 px-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value={2}>12</option>
-                    <option value={24}>24</option>
-                    <option value={48}>48</option>
-                  </select>
+
+                <div className="flex items-center gap-3">
+                  {/* Sort By Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">
+                      Sort by:
+                    </label>
+                    <select
+                      value={`${sortBy}-${sortDir}`}
+                      onChange={(e) => {
+                        const [field, direction] = e.target.value.split("-");
+                        setSortBy(field);
+                        setSortDir(direction);
+                      }}
+                      className="h-8 px-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="created_at-DESC">Newest First</option>
+                      <option value="created_at-ASC">Oldest First</option>
+                      <option value="price-ASC">Price: Low to High</option>
+                      <option value="price-DESC">Price: High to Low</option>
+                      <option value="title-ASC">Name: A to Z</option>
+                      <option value="title-DESC">Name: Z to A</option>
+                    </select>
+                  </div>
+
+                  {/* Results Per Page Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">
+                      Show:
+                    </label>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}
+                      className="h-8 px-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value={12}>12</option>
+                      <option value={24}>24</option>
+                      <option value={48}>48</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
