@@ -1,51 +1,3 @@
-export interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  version: number;
-  
-  // Common fields
-  availableStock?: number;
-  minOrderQty?: number;
-  maxOrderQty?: number;
-  qtyStep?: number;
-  isDeliveryAvailable: boolean;
-  deliveryFee?: number;
-  expiryDate?: string;
-  
-  // NEW: Product Type fields
-  productType: ProductType;
-  unit?: string;
-  
-  // NEW: Rental fields
-  rentalPricePerDay?: number;
-  depositAmount?: number;
-  minRentalDays?: number;
-  maxRentalDays?: number;
-  
-  // NEW: Service fields
-  serviceDurationHours?: number;
-  
-  // Media
-  imageUrls: string[];
-  videoUrl?: string;
-  
-  // Attributes
-  attributes?: Record<string, any>;
-  
-  // Status & Farmer
-  status: ProductStatus;
-  farmerId: string;
-  farmerName: string;
-  
-  //  NEW: Distance (calculated during location-based search)
-  distance?: number;
-  
-  createdAt: string;
-  updatedAt: string;
-}
-
 export enum ProductType {
   PHYSICAL_GOOD = 'PHYSICAL_GOOD',
   RENTABLE = 'RENTABLE',
@@ -54,10 +6,67 @@ export enum ProductType {
 
 export enum ProductStatus {
   DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   ACTIVE = 'ACTIVE',
   OUT_OF_STOCK = 'OUT_OF_STOCK',
+  SUSPENDED = 'SUSPENDED',
 }
 
+
+// Matches backend District entity (simplified for delivery areas)
+export interface District {
+  id: number;
+  nameEn: string;
+  nameSi?: string;
+  nameTa?: string;
+}
+
+// 1. Fix the Location interface to match the JSON
+export interface ProductLocation {
+  cityId: number;
+  cityName: string;
+  districtId: number;
+  districtName: string | null; // Allow null so TypeScript doesn't complain
+}
+
+// 2. Update the main Product interface
+export interface Product {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  productType: ProductType;
+  status: ProductStatus;
+  version: number;
+
+  minOrderQty?: number;
+  maxOrderQty?: number;
+  qtyStep?: number;
+
+  isDeliveryAvailable: boolean;
+  deliveryFee?: number;
+
+  categoryId?: string;
+  categoryName?: string;
+
+  attributes?: Record<string, any>;
+
+  imageUrls: string[];
+  videoUrl?: string | null;
+
+  // Match the exact JSON keys
+  locations?: ProductLocation[];
+  deliveryDistrictIds?: number[]; // It's an array of numbers, not District objects
+
+  farmerId: string;
+  farmerName: string;
+  farmerAverageRating: number;
+  farmerTotalReviews: number;
+  farmerProfilePictureUrl?: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface ProductFilter {
   page?: number;
