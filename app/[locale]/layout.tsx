@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { AuthProvider } from '@/components/providers/AuthProvider'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
 export default async function LocaleLayout({ 
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
             <AuthProvider>  {/* Wrap with AuthProvider */}
               <NextIntlClientProvider messages={messages}>
                 <ThemeProvider  defaultTheme="system" >
+                  <Toaster richColors position="top-right" /> 
                   {children}
                 </ThemeProvider>
               </NextIntlClientProvider>

@@ -56,7 +56,8 @@
     "chat": "Chat",
     "profile": "Profile",
     "dashboard": "Dashboard",
-    "products": "Products"
+    "products": "Products",
+    "cart" : "cart"
   },
 
   "products": {

@@ -5,6 +5,7 @@ import { useProduct } from "@/lib/api/products";
 import { useLocale, useTranslations } from "next-intl";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductType } from "@/types/product";
+import { useAddToCart } from "@/lib/api/cart";
 import {
   MapPin,
   Truck,
@@ -14,9 +15,12 @@ import {
   Star,
   ShieldCheck,
   Loader2,
+  ShoppingCart,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -24,6 +28,7 @@ export default function ProductDetailPage() {
   const t = useTranslations("products");
 
   const { data: product, isLoading, error } = useProduct(id as string);
+  const addToCartMutation = useAddToCart();
 
   if (isLoading) {
     return (
@@ -32,6 +37,28 @@ export default function ProductDetailPage() {
       </div>
     );
   }
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    try {
+      // Use mutateAsync so we can await it and catch errors
+      await addToCartMutation.mutateAsync({
+        productId: product.id,
+        quantity: Number(product.minOrderQty || 1),
+      });
+
+      // Success!
+      toast.success("Item added to cart");
+    } catch (error: any) {
+      // Extract the exact message from the backend's 400 response
+      const errorMessage =
+        error.response?.data?.message || "Failed to add item to cart.";
+
+      // Show the specific business rule violation to the user
+      toast.error(errorMessage);
+    }
+  };
 
   if (error || !product) {
     return (
@@ -255,13 +282,30 @@ export default function ProductDetailPage() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
-              {product.productType === ProductType.RENTABLE
-                ? "Request Booking"
-                : "Add to Cart"}
-            </button>
-            <button className="px-6 border border-border rounded-lg font-semibold hover:bg-muted transition-colors">
-              Contact Farmer
+            <button
+              onClick={handleAddToCart}
+              disabled={
+                addToCartMutation.isPending ||
+                product.productType === ProductType.RENTABLE
+              } // Disable for rentals in V1
+              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {addToCartMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Adding...
+                </>
+              ) : addToCartMutation.isSuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Added to Cart!
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  {product.productType === ProductType.RENTABLE
+                    ? "Request Booking"
+                    : "Add to Cart"}
+                </>
+              )}
             </button>
           </div>
         </div>
