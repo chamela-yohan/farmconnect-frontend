@@ -1,7 +1,8 @@
 // lib/api/orders.ts
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { OrderCreateRequest, OrderResponse } from '@/types/order';
+import { Page } from '@/types/common';
 
 export const useCheckout = () => {
   const queryClient = useQueryClient();
@@ -19,4 +20,20 @@ export const useCheckout = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] }); 
     },
   });
+
 };
+
+export const useBuyerOrders = (status?: string, page = 0, size = 10) => {
+  return useQuery({
+    queryKey: ['orders', 'buyer', status, page, size],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (status && status !== 'ALL') params.append('status', status);
+      params.append('page', page.toString());
+      params.append('size', size.toString());
+
+      const { data } = await api.get(`/orders/my-orders?${params.toString()}`);
+      return data.data as Page<OrderResponse>;
+    },
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  })};
