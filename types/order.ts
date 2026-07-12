@@ -17,16 +17,15 @@ export interface OrderCreateRequest {
 export interface OrderItemResponse {
   id: string;
   productId: string;
-  productTitleSnapshot: string; // Mapped from productTitleSnapshot
-  unitPriceSnapshot: number;    // Mapped from unitPriceSnapshot
+  productTitle: string;
+  unitPrice: number;
   requestedQty: number;
   approvedQty: number;
   subtotal: number;
-  deliveryFee: number;
   imageUrls?: string[]; 
   attributesSnapshot?: {
-    unit?: string;
-    [key: string]: any;
+    unit?: string; 
+    [key: string]: any; // Allow other custom attributes
   };
 }
 
@@ -55,4 +54,22 @@ export interface OrderResponse {
   // Conditional Unlocking (Only populated if status >= ACCEPTED)
   buyerMobile?: string | null;
   farmerMobile?: string | null;
+}
+
+// types/order.ts
+
+// Define the exact states from your backend enum
+export type OrderStatus = 
+  | 'PENDING' 
+  | 'ACCEPTED' 
+  | 'PREPARING' 
+  | 'OUT_FOR_DELIVERY' 
+  | 'DELIVERED' 
+  | 'REJECTED' 
+  | 'CANCELLED';
+
+// The payload sent to the backend when a farmer updates an order
+export interface OrderStatusUpdateRequest {
+  newStatus: OrderStatus;
+  notes?: string; // Optional: Used for rejection reasons or delivery updates
 }
