@@ -22,6 +22,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 
+import { useState } from "react";
+import { BookingModal } from "@/components/booking/BookingModal";
+
 export default function ProductDetailPage() {
   const { id } = useParams();
   const locale = useLocale();
@@ -29,6 +32,8 @@ export default function ProductDetailPage() {
 
   const { data: product, isLoading, error } = useProduct(id as string);
   const addToCartMutation = useAddToCart();
+
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -282,32 +287,48 @@ export default function ProductDetailPage() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <button
-              onClick={handleAddToCart}
-              disabled={
-                addToCartMutation.isPending ||
-                product.productType === ProductType.RENTABLE
-              } // Disable for rentals in V1
-              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {addToCartMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Adding...
-                </>
-              ) : addToCartMutation.isSuccess ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" /> Added to Cart!
-                </>
-              ) : (
-                <>
+            {product.productType === ProductType.RENTABLE ? (
+              <button
+                onClick={() => setIsBookingModalOpen(true)}
+                className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Calendar className="w-4 h-4" /> Request Booking
+              </button>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                disabled={addToCartMutation.isPending}
+                className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {addToCartMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
                   <ShoppingCart className="w-4 h-4" />
-                  {product.productType === ProductType.RENTABLE
-                    ? "Request Booking"
-                    : "Add to Cart"}
-                </>
-              )}
+                )}
+                Add to Cart
+              </button>
+            )}
+
+            <button className="px-6 border border-border rounded-lg font-semibold hover:bg-muted transition-colors">
+              Contact Farmer
             </button>
           </div>
+
+          {/* Render the Modal at the bottom of the component */}
+          {product.productType === ProductType.RENTABLE && (
+            <BookingModal
+              isOpen={isBookingModalOpen}
+              onClose={() => setIsBookingModalOpen(false)}
+              product={{
+                id: product.id,
+                title: product.title,
+                rentalPricePerDay: Number(
+                  product.attributes?.rentalPricePerDay || product.price,
+                ),
+                depositAmount: Number(product.attributes?.depositAmount || 0),
+              }}
+            />
+          )}
         </div>
       </div>
 

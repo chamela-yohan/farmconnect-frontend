@@ -37,6 +37,7 @@ export default function AddProductPage() {
     depositAmount: undefined,
     minRental: undefined,
     maxRental: undefined,
+    availableUnits: undefined,
     deliveryFee: undefined,
   });
 

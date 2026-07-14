@@ -121,6 +121,8 @@ export interface ProductFormData {
   minRental?: number; // e.g., Min 1 day for tractor, Min 2 hours for service
   maxRental?: number; // e.g., Max 30 days for tractor, Max 8 hours for service
   
+   availableUnits?: number;
+
   // Flexible JSON Data (Holds 'category' and other custom attributes)
   attributes?: Record<string, any>; 
 

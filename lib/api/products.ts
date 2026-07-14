@@ -145,53 +145,82 @@ export const useDeleteProduct = () => {
 // This is crucial for matching your backend's @RequestParam("product") String productJson
 // lib/api/products.ts
 
+import { ProductFormData, ProductType } from "@/types/product";
+
 export const prepareProductFormData = (
-  productData: any,
+  productData: ProductFormData,
   images: File[],
-  video?: File,
-) => {
+  video?: File
+): FormData => {
   const formData = new FormData();
+  const attributes: Record<string, any> = {};
 
-  const attributes: any = {};
-
-  if (productData.productType === "PHYSICAL_GOOD") {
-    attributes.availableStock = productData.availableStock;
-    attributes.unit = productData.unit;
-    attributes.expiryDate = productData.expiryDate;
-  } else if (productData.productType === "RENTABLE") {
-    attributes.rentalPricePerDay = productData.rentalPricePerDay;
-    attributes.depositAmount = productData.depositAmount;
-    attributes.minRental = productData.minRental;
-    attributes.maxRental = productData.maxRental;
-    attributes.unit = "pcs";
-  } else if (productData.productType === "SERVICE") {
-    attributes.minRental = productData.minRental;
-    attributes.maxRental = productData.maxRental;
-    attributes.unit = productData.unit;
+  // ==========================================
+  // 1. BUILD ATTRIBUTES BASED ON PRODUCT TYPE
+  // ==========================================
+  if (productData.productType === ProductType.PHYSICAL_GOOD) {
+    if (productData.availableStock) attributes.availableStock = Number(productData.availableStock);
+    if (productData.unit) attributes.unit = productData.unit;
+    if (productData.expiryDate) attributes.expiryDate = productData.expiryDate;
+  } 
+  else if (productData.productType === ProductType.RENTABLE) {
+    // Map the UI's 'availableStock' input to 'availableUnits' for backend capacity checks
+    if (productData.availableStock) attributes.availableUnits = Number(productData.availableStock);
+    
+    if (productData.rentalPricePerDay) attributes.rentalPricePerDay = Number(productData.rentalPricePerDay);
+    if (productData.depositAmount) attributes.depositAmount = Number(productData.depositAmount);
+    if (productData.minRental) attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental) attributes.maxRental = Number(productData.maxRental);
+    
+    attributes.unit = "pcs"; // Locked per your UI design
+  } 
+  else if (productData.productType === ProductType.SERVICE) {
+    // Map the UI's 'availableStock' input to 'availableUnits' for backend capacity checks
+    if (productData.availableStock) attributes.availableUnits = Number(productData.availableStock);
+    
+    if (productData.minRental) attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental) attributes.maxRental = Number(productData.maxRental);
+    if (productData.unit) attributes.unit = productData.unit;
   }
 
+  // ==========================================
+  // 2. BUILD CORE PRODUCT PAYLOAD (Sanitized)
+  // ==========================================
   const productPayload = {
-    title: productData.title,
-    description: productData.description,
-    price: productData.price,
+    title: productData.title.trim(),
+    description: productData.description.trim(),
+    price: Number(productData.price),
     productType: productData.productType,
     categoryId: productData.categoryId,
-    minOrderQty: productData.minOrderQty,
-    maxOrderQty: productData.maxOrderQty,
-    qtyStep: productData.qtyStep,
-    isDeliveryAvailable: productData.isDeliveryAvailable,
-    deliveryFee: productData.deliveryFee,
-
-    //  Locations and Delivery
+    
+    // Ensure numbers are actually numbers, or undefined if empty
+    minOrderQty: productData.minOrderQty ? Number(productData.minOrderQty) : undefined,
+    maxOrderQty: productData.maxOrderQty ? Number(productData.maxOrderQty) : undefined,
+    qtyStep: productData.qtyStep ? Number(productData.qtyStep) : undefined,
+    deliveryFee: productData.deliveryFee ? Number(productData.deliveryFee) : undefined,
+    
+    isDeliveryAvailable: Boolean(productData.isDeliveryAvailable),
     locationCityIds: productData.locationCityIds || [],
     deliveryDistrictIds: productData.deliveryDistrictIds || [],
-
     attributes: attributes,
   };
 
+  // ==========================================
+  // 3. APPEND TO FORMDATA (Best Practices)
+  // ==========================================
+  
+  // Append JSON payload
   formData.append("product", JSON.stringify(productPayload));
-  images.forEach((image) => formData.append("images", image));
-  if (video) formData.append("video", video);
+  
+  // Append images with explicit filenames (prevents backend parsing issues)
+  images.forEach((image) => {
+    formData.append("images", image, image.name);
+  });
+  
+  // Append video if it exists
+  if (video) {
+    formData.append("video", video, video.name);
+  }
 
   return formData;
 };

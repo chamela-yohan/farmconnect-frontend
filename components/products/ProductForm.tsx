@@ -261,7 +261,7 @@ export function ProductForm({
           </div>
           <div>
             <label className="text-sm font-medium">{labels.stock} *</label>
-            <input type="number" step="0.01" min="0" value={formData.availableStock || ""} onChange={(e) => setFormData({ ...formData, availableStock: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder={formData.productType === ProductType.PHYSICAL_GOOD ? "100" : "5"} />
+            <input type="number" step={formData.productType === ProductType.PHYSICAL_GOOD ? "0.01" : "1"} min="0" value={formData.availableStock || ""} onChange={(e) => setFormData({ ...formData, availableStock: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder={formData.productType === ProductType.PHYSICAL_GOOD ? "100" : "5"} />
             {errors.availableStock && <p className="text-sm text-destructive mt-1">{errors.availableStock}</p>}
             <p className="text-xs text-muted-foreground mt-1">
               {formData.productType === ProductType.PHYSICAL_GOOD && "Total quantity available (e.g., 100 kg)."}
