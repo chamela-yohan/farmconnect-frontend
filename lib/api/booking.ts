@@ -1,6 +1,7 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { BookingRequest, Booking } from "@/types/booking";
+import { BookingRequest, Booking, BookingStatus } from "@/types/booking";
+import { Page } from '@/types/common';
 import { toast } from "sonner";
 
 export const useCreateBooking = () => {
@@ -26,5 +27,45 @@ export const useCreateBooking = () => {
         error.response?.data?.message || "Failed to create booking request.",
       );
     },
+  });
+};
+
+export const useFarmerBookings = (status?: string, page = 0, size = 10) => {
+  return useQuery({
+    queryKey: ['bookings', 'farmer', status, page, size],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (status && status !== 'ALL') params.append('status', status);
+      params.append('page', page.toString());
+      params.append('size', size.toString());
+
+      const { data } = await api.get(`/bookings/farmer?${params.toString()}`);
+      return data.data as Page<Booking>;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useUpdateBookingStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ bookingId, newStatus, notes }: { bookingId: string; newStatus: BookingStatus; notes?: string }) => {
+      
+      const payload = {
+        newStatus: newStatus,
+        notes: notes || null // Send null instead of undefined to ensure clean JSON
+      };
+
+      const { data } = await api.put(`/bookings/${bookingId}/status`, payload);
+      return data.data as Booking;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      toast.success("Booking status updated successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update booking.");
+    }
   });
 };
