@@ -23,5 +23,6 @@ export interface Booking {
   status: BookingStatus;
   buyerNotes?: string;
   farmerNotes?: string;
+  farmerName?: string;
   createdAt: string;
 }

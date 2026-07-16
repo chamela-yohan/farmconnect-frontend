@@ -69,3 +69,19 @@ export const useUpdateBookingStatus = () => {
     }
   });
 };
+
+export const useBuyerBookings = (status?: string, page = 0, size = 10) => {
+  return useQuery({
+    queryKey: ['bookings', 'buyer', status, page, size],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (status && status !== 'ALL') params.append('status', status);
+      params.append('page', page.toString());
+      params.append('size', size.toString());
+
+      const { data } = await api.get(`/bookings/buyer?${params.toString()}`);
+      return data.data as Page<Booking>;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+};
