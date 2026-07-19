@@ -70,3 +70,16 @@ export const useUpdateOrderStatus = () => {
     },
   });
 };
+
+export const useOrder = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ['order', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/orders/${id}`);
+      return data.data as OrderResponse;
+    },
+    enabled: !!id, // Prevents the query from running if the ID is undefined/null
+    staleTime: 1000 * 60 * 5, // Cache the order data for 5 minutes to prevent unnecessary refetches
+    retry: 1, // Only retry once on failure to avoid spamming the backend
+  });
+};

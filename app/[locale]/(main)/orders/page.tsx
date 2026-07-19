@@ -13,6 +13,7 @@ export default function OrdersPage() {
   const [activeStatus, setActiveStatus] = useState<string>("ALL");
   const [page, setPage] = useState(0);
 
+  // ✅ Only fetch the paginated list of orders here
   const { data, isLoading, isError } = useBuyerOrders(activeStatus, page, 10);
 
   const formatPrice = (price: number) =>
@@ -115,7 +116,6 @@ export default function OrdersPage() {
                 <div className="space-y-3 mb-4">
                   {order.items.slice(0, 3).map((item) => (
                     <div key={item.id} className="flex items-center gap-3">
-                      {/*  Product Image */}
                       <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
                         {item.imageUrls?.[0] && (
                           <Image
@@ -131,7 +131,6 @@ export default function OrdersPage() {
                           {item.productTitle}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {/*  Display Quantity with Unit from attributesSnapshot */}
                           Qty: {item.approvedQty}{" "}
                           {item.attributesSnapshot?.unit || "units"}
                         </p>
@@ -141,6 +140,11 @@ export default function OrdersPage() {
                       </p>
                     </div>
                   ))}
+                  {order.items.length > 3 && (
+                    <p className="text-xs text-muted-foreground pl-15">
+                      + {order.items.length - 3} more items
+                    </p>
+                  )}
                 </div>
 
                 {/* Delivery Info */}

@@ -10,10 +10,9 @@ import Image from "next/image";
 
 export default function FarmerOrdersPage() {
   const locale = useLocale();
-  const [activeStatus, setActiveStatus] = useState<string>("PENDING"); // Default to pending for farmers
+  const [activeStatus, setActiveStatus] = useState<string>("PENDING");
   const [page, setPage] = useState(0);
   
-  // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<{ id: string; number: string } | null>(null);
   const [actionType, setActionType] = useState<"ACCEPT" | "REJECT">("ACCEPT");
@@ -42,11 +41,10 @@ export default function FarmerOrdersPage() {
     });
   };
 
-  // Helper to determine next possible actions based on state machine
   const getAvailableActions = (status: string) => {
     switch (status) {
       case "PENDING": return ["ACCEPT", "REJECT"];
-      case "ACCEPTED": return ["PREPARING", "REJECT"]; // Allow cancelling even after accept
+      case "ACCEPTED": return ["PREPARING", "REJECT"];
       case "PREPARING": return ["OUT_FOR_DELIVERY"];
       case "OUT_FOR_DELIVERY": return ["DELIVERED"];
       default: return [];
