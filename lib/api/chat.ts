@@ -46,15 +46,46 @@ export const useMarkAsRead = () => {
 
 //  GET CONVERSATION BY ORDER
 export const useConversationByOrder = (orderId: string | null) => {
-  return useQuery({
+  return useQuery<string | null>({
     queryKey: ['conversation', 'order', orderId],
-    queryFn: async () => {
+    queryFn: async (): Promise<string | null> => {
       if (!orderId) return null;
-      // This was already correct, kept for consistency
-      const { data } = await api.get(`/chat/order/${orderId}/conversation`);
-      return data.data as string | null;
+      
+      try {
+        const response = await api.get(`/chat/order/${orderId}/conversation`);
+        // Safely extract the data, explicitly defaulting to null if undefined
+        const result = response?.data?.data;
+        return result !== undefined ? (result as string) : null;
+      } catch (error) {
+        // If the endpoint returns 404/500 or the conversation doesn't exist yet, return null
+        console.warn("No conversation found for order:", orderId);
+        return null; 
+      }
     },
     enabled: !!orderId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+// Get Conversation ID by Booking
+export const useConversationByBooking = (bookingId: string | null) => {
+  return useQuery<string | null>({
+    queryKey: ['conversation', 'booking', bookingId],
+    queryFn: async (): Promise<string | null> => {
+      if (!bookingId) return null;
+      
+      try {
+        const response = await api.get(`/chat/booking/${bookingId}/conversation`);
+        // Safely extract the data, explicitly defaulting to null if undefined
+        const result = response?.data?.data;
+        return result !== undefined ? (result as string) : null;
+      } catch (error) {
+        // If the endpoint returns 404/500 or the conversation doesn't exist yet, return null
+        console.warn("No conversation found for booking:", bookingId);
+        return null;
+      }
+    },
+    enabled: !!bookingId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
