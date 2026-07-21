@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useOrder } from "@/lib/api/orders"; // Reusing the same hook (backend validates ownership)
+import { useOrder } from "@/lib/api/orders";
 import { useConversationByOrder } from "@/lib/api/chat";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { ChatDrawer } from "@/components/chat/ChatDrawer";
@@ -16,6 +16,7 @@ export default function FarmerOrderDetailsPage() {
   const { id } = useParams();
   const locale = useLocale();
   
+  // ✅ 1. ALL HOOKS AT THE VERY TOP
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   const { data: order, isLoading, isError } = useOrder(id as string);
@@ -27,6 +28,7 @@ export default function FarmerOrderDetailsPage() {
   const formatDate = (dateString: string) =>
     new Intl.DateTimeFormat("en-LK", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(dateString));
 
+  // ✅ 2. EARLY RETURNS *AFTER* HOOKS
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -81,17 +83,13 @@ export default function FarmerOrderDetailsPage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border border-border">
                     <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                      {item.imageUrls?.[0] && (
-                        <Image src={item.imageUrls[0]} alt={item.productTitle} fill className="object-cover" />
-                      )}
+                      {item.imageUrls?.[0] && <Image src={item.imageUrls[0]} alt={item.productTitle} fill className="object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-foreground truncate">{item.productTitle}</h3>
                       <p className="text-sm text-muted-foreground mt-1">
                         Approved Qty: {item.approvedQty} {item.attributesSnapshot?.unit || "units"}
-                        {item.requestedQty !== item.approvedQty && (
-                          <span className="text-amber-600 ml-2">(Originally requested: {item.requestedQty})</span>
-                        )}
+                        {item.requestedQty !== item.approvedQty && <span className="text-amber-600 ml-2">(Originally requested: {item.requestedQty})</span>}
                       </p>
                       <p className="text-sm font-semibold text-foreground mt-1">{formatPrice(item.subtotal)}</p>
                     </div>
@@ -106,22 +104,13 @@ export default function FarmerOrderDetailsPage() {
               </h2>
               <div className="p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                 <div className="flex items-start gap-3">
-                  {order.deliveryMethod === "DELIVERY" ? (
-                    <MapPin className="w-5 h-5 text-primary mt-0.5" />
-                  ) : (
-                    <Store className="w-5 h-5 text-primary mt-0.5" />
-                  )}
+                  {order.deliveryMethod === "DELIVERY" ? <MapPin className="w-5 h-5 text-primary mt-0.5" /> : <Store className="w-5 h-5 text-primary mt-0.5" />}
                   <div>
-                    <p className="font-medium text-foreground">
-                      {order.deliveryMethod === "DELIVERY" ? "Deliver to:" : "Buyer will pickup from farm"}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {order.deliveryMethod === "DELIVERY" ? order.deliveryAddress : "Farm Location"}
-                    </p>
+                    <p className="font-medium text-foreground">{order.deliveryMethod === "DELIVERY" ? "Deliver to:" : "Buyer will pickup from farm"}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{order.deliveryMethod === "DELIVERY" ? order.deliveryAddress : "Farm Location"}</p>
                   </div>
                 </div>
                 
-                {/* Buyer Notes are CRITICAL for the farmer to see */}
                 {order.buyerNotes && (
                   <div className="pt-3 border-t border-border bg-blue-50/50 p-3 rounded-md -mx-3 -mb-3 px-4 pb-4">
                     <p className="text-sm font-medium text-blue-800">Buyer's Note to You:</p>
@@ -149,8 +138,7 @@ export default function FarmerOrderDetailsPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{order.buyerName}</p>
-                  {/* Show mobile only if status is ACCEPTED or higher */}
-                  {["ACCEPTED", "PREPARING", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) && order.buyerMobile && (
+                  {["ACCEPTED", "PREPARING", "OUT_FOR_DELIVERY", "READY_FOR_PICKUP", "DELIVERED", "COMPLETED"].includes(order.status) && order.buyerMobile && (
                     <p className="text-sm text-muted-foreground">{order.buyerMobile}</p>
                   )}
                 </div>
@@ -158,17 +146,12 @@ export default function FarmerOrderDetailsPage() {
               
               <button
                 onClick={() => {
-                  if (conversationId) {
-                    setIsChatOpen(true);
-                  } else {
-                    toast.info("Chat is available for this order.");
-                  }
+                  if (conversationId) setIsChatOpen(true);
+                  else toast.info("Chat is available for this order.");
                 }}
                 disabled={!conversationId}
                 className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-colors ${
-                  conversationId
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                  conversationId ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -176,16 +159,11 @@ export default function FarmerOrderDetailsPage() {
               </button>
             </div>
 
-            {/* Invoice Download */}
-            {order.status !== "PENDING" && order.status !== "REJECTED" && (
+            {order.status !== "PENDING" && order.status !== "REJECTED" && order.status !== "CANCELLED" && (
               <div className="p-5 bg-card border border-border rounded-xl">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Documents</h3>
-                <Link 
-                  href={`/${locale}/orders/${order.id}/download`}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium border border-border text-foreground hover:bg-muted transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Invoice
+                <Link href={`/${locale}/orders/${order.id}/download`} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium border border-border text-foreground hover:bg-muted transition-colors">
+                  <Download className="w-4 h-4" /> Download Invoice
                 </Link>
               </div>
             )}
@@ -194,11 +172,7 @@ export default function FarmerOrderDetailsPage() {
       </div>
 
       {/* Chat Drawer */}
-      <ChatDrawer
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        initialConversationId={conversationId}
-      />
+      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} initialConversationId={conversationId} />
     </div>
   );
 }

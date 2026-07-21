@@ -60,13 +60,16 @@ export interface OrderResponse {
 
 // Define the exact states from your backend enum
 export type OrderStatus = 
-  | 'PENDING' 
-  | 'ACCEPTED' 
-  | 'PREPARING' 
-  | 'OUT_FOR_DELIVERY' 
-  | 'DELIVERED' 
-  | 'REJECTED' 
-  | 'CANCELLED';
+ | 'PENDING'
+ | 'ACCEPTED'
+ | 'PREPARING'
+ | 'OUT_FOR_DELIVERY'
+ | 'READY_FOR_PICKUP'
+ | 'DELIVERED'
+ | 'COMPLETED'
+ | 'REJECTED'
+ | 'CANCELLED'
+;
 
 // The payload sent to the backend when a farmer updates an order
 export interface OrderStatusUpdateRequest {

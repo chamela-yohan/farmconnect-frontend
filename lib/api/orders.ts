@@ -83,3 +83,4 @@ export const useOrder = (id: string | undefined) => {
     retry: 1, // Only retry once on failure to avoid spamming the backend
   });
 };
+

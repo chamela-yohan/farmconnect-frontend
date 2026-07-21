@@ -70,15 +70,18 @@ export default function FarmerOrdersPage() {
     });
   };
 
-  const getAvailableActions = (status: string) => {
+  const getAvailableActions = (status: string, deliveryMethod: string) => {
     switch (status) {
       case "PENDING":
         return ["ACCEPT", "REJECT"];
       case "ACCEPTED":
         return ["PREPARING", "REJECT"];
       case "PREPARING":
-        return ["OUT_FOR_DELIVERY"];
+        return deliveryMethod === "DELIVERY"
+          ? ["OUT_FOR_DELIVERY"]
+          : ["READY_FOR_PICKUP"];
       case "OUT_FOR_DELIVERY":
+      case "READY_FOR_PICKUP":
         return ["DELIVERED"];
       default:
         return [];
@@ -126,7 +129,10 @@ export default function FarmerOrdersPage() {
       ) : data && data.content.length > 0 ? (
         <div className="space-y-6">
           {data.content.map((order) => {
-            const actions = getAvailableActions(order.status);
+            const actions = getAvailableActions(
+              order.status,
+              order.deliveryMethod,
+            );
 
             return (
               <div
@@ -244,6 +250,19 @@ export default function FarmerOrdersPage() {
                           Mark Preparing
                         </button>
                       )}
+                      {actions.includes("READY_FOR_PICKUP") && (
+                        <button
+                          onClick={() =>
+                            updateMutation.mutateAsync({
+                              orderId: order.id,
+                              request: { newStatus: "READY_FOR_PICKUP" },
+                            })
+                          }
+                          className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Store className="w-4 h-4" /> Ready for Pickup
+                        </button>
+                      )}
                       {actions.includes("OUT_FOR_DELIVERY") && (
                         <button
                           onClick={() =>
@@ -270,14 +289,13 @@ export default function FarmerOrdersPage() {
                           Mark Delivered
                         </button>
                       )}
-                      
-                        <Link
-                          href={`/${locale}/farmer/orders/${order.id}`}
-                          className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-                        >
-                          View Details <ChevronRight className="w-4 h-4" />
-                        </Link>
-                     
+
+                      <Link
+                        href={`/${locale}/farmer/orders/${order.id}`}
+                        className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                      >
+                        View Details <ChevronRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
                 </div>
