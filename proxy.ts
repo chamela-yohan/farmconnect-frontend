@@ -2,15 +2,21 @@ import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import { NextRequest } from 'next/server';
 
-// Initialize the next-intl middleware
-const intlMiddleware = createMiddleware(routing);
 
-// Next.js 16 requires the exported function to be named 'proxy'
+const handleI18nRouting = createMiddleware(routing);
+
 export default function proxy(request: NextRequest) {
-  return intlMiddleware(request);
+  return handleI18nRouting(request);
 }
 
 export const config = {
-  // Only match paths that need locale handling
-  matcher: ['/', '/(en|si|ta)/:path*']
+  // Production-grade matcher: 
+  // 1. Matches the root path
+  // 2. Matches locale-prefixed paths
+  // 3. EXCLUDES api routes, _next, _vercel, and static files (like .png, .ico)
+  matcher: [
+    '/',
+    '/(en|si|ta)/:path*',
+    '/((?!api|_next|_vercel|.*\\..*).*)'
+  ]
 };
