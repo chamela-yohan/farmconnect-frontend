@@ -1,19 +1,29 @@
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-
-const handleI18nRouting = createMiddleware(routing);
+const intlMiddleware = createMiddleware(routing);
 
 export default function proxy(request: NextRequest) {
-  return handleI18nRouting(request);
+  const pathname = request.nextUrl.pathname;
+
+  // Check if the path contains '/admin' (handles /admin, /en/admin, /si/admin, etc.)
+  if (pathname.includes('/admin')) {
+    // Get the user's role from the cookie (ensure this is set during login)
+    const userRole = request.cookies.get('user_role')?.value;
+
+    if (userRole !== 'ADMIN') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/'; // Redirect to home
+      url.searchParams.set('error', 'Access Denied: Admin privileges required.');
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return intlMiddleware(request);
 }
 
 export const config = {
-  // Production-grade matcher: 
-  // 1. Matches the root path
-  // 2. Matches locale-prefixed paths
-  // 3. EXCLUDES api routes, _next, _vercel, and static files (like .png, .ico)
   matcher: [
     '/',
     '/(en|si|ta)/:path*',

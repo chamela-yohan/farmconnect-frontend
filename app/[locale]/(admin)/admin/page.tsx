@@ -5,15 +5,33 @@ import { api } from '@/lib/api';
 import { DollarSign, ShoppingCart, Users, Tractor } from 'lucide-react';
 
 export default function AdminDashboardPage() {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
       const { data } = await api.get('/admin/analytics/dashboard');
       return data.data;
     },
+    retry: 1, // Only retry once to fail fast if unauthorized
   });
 
-  if (isLoading) return <div className="text-center py-20">Loading dashboard...</div>;
+  //  Clean loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  //  Clean error state (e.g., if middleware fails and backend returns 403)
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
+        <h2 className="text-2xl font-bold text-destructive">Access Denied</h2>
+        <p className="text-muted-foreground mt-2">You do not have permission to view this page.</p>
+      </div>
+    );
+  }
 
   const cards = [
     { title: 'Total Revenue', value: `LKR ${stats?.totalRevenue || 0}`, icon: DollarSign, color: 'text-green-500' },

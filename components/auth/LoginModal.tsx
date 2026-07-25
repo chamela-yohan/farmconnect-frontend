@@ -5,6 +5,7 @@ import { X, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
+import {  useLocale } from "next-intl";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ export function LoginModal({ isOpen, onClose,onLoginSuccess, redirectTo }: Login
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+    const locale = useLocale();
   const { login } = useAuthStore();
   const router = useRouter();
 
@@ -35,25 +36,26 @@ export function LoginModal({ isOpen, onClose,onLoginSuccess, redirectTo }: Login
       const { accessToken, refreshToken, user } = response.data.data;
 
       login(user, accessToken, refreshToken);
-
       onLoginSuccess?.();
 
+      //  Updated Modal Redirect Logic
       if (redirectTo) {
         router.push(redirectTo);
+      } else if (user.role === "ADMIN") {
+        router.push(`/${locale}/admin`);
+      } else if (user.role === "FARMER") {
+        router.push(`/${locale}/dashboard/farmer`);
+      } else {
+        router.push(`/${locale}/dashboard/buyer`);
       }
 
-      // Close modal and redirect
       onClose();
-      if (redirectTo) {
-        router.push(redirectTo);
-      }
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-lg p-6 md:p-8 relative">

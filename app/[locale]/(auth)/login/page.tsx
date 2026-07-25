@@ -44,15 +44,17 @@ export default function LoginPage() {
       const response = await api.post("/auth/login", data);
       const { accessToken, refreshToken, user } = response.data.data;
 
-      // ✅ Pass BOTH tokens to the store
+      // Pass BOTH tokens to the store (this now sets the cookie too!)
       login(user, accessToken, refreshToken);
 
-      // Check if profile is complete
-      if (!user.profileComplete) {
+      //  Updated Redirect Logic
+      if (!user.profileComplete && user.role !== "ADMIN") {
         router.push(`/${locale}/complete-profile`);
       } else {
         // Redirect based on role
-        if (user.role === "FARMER") {
+        if (user.role === "ADMIN") {
+          router.push(`/${locale}/admin`);
+        } else if (user.role === "FARMER") {
           router.push(`/${locale}/dashboard/farmer`);
         } else {
           router.push(`/${locale}/dashboard/buyer`);
