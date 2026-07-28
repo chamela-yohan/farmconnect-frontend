@@ -12,6 +12,7 @@ interface User {
   role: "BUYER" | "FARMER" | "ADMIN"; //  Added ADMIN
   profilePictureUrl?: string;
   profileComplete: boolean;
+  isVerified: boolean,
 }
 
 interface AuthState {

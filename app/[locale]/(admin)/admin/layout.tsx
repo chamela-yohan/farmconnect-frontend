@@ -1,7 +1,11 @@
-import Link from 'next/link';
-import { LayoutDashboard, Users, ShieldAlert, LogOut } from 'lucide-react';
+import Link from "next/link";
+import { LayoutDashboard, Users, ShieldAlert, LogOut, FileCheck } from "lucide-react";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar - Hidden on mobile, visible on desktop */}
@@ -10,15 +14,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h1 className="text-2xl font-bold text-primary">FarmConnect Admin</h1>
         </div>
         <nav className="flex-1 space-y-2 px-4">
-          <Link href="/admin" className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
             <LayoutDashboard className="w-5 h-5" />
             Dashboard
           </Link>
-          <Link href="/admin/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+          <Link
+            href="/admin/users"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
             <Users className="w-5 h-5" />
             User Management
           </Link>
-          <Link href="/admin/moderation" className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+
+          <Link
+            href="/admin/kyc"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <FileCheck className="w-5 h-5" /> KYC Verification
+          </Link>
+
+          <Link
+            href="/admin/moderation"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
             <ShieldAlert className="w-5 h-5" />
             Content Moderation
           </Link>
@@ -38,10 +59,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h1 className="text-lg font-bold text-primary">Admin Panel</h1>
           {/* Add a mobile menu button here if needed */}
         </header>
-        
-        <div className="p-6 md:p-8">
-          {children}
-        </div>
+
+        <div className="p-6 md:p-8">{children}</div>
       </main>
     </div>
   );
