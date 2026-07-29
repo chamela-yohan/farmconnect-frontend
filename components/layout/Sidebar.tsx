@@ -28,7 +28,7 @@ export function Sidebar() {
 
   const farmerLinks = [
     { href: `/${locale}/dashboard/farmer`, label: t('dashboard'), icon: Home, protected: true },
-    { href: `/${locale}/products`, label: t('products'), icon: Package, protected: true },
+    { href: `/${locale}/farmer/products`, label: t('products'), icon: Package, protected: true },
     { href: `/${locale}/orders`, label: t('orders'), icon: ShoppingCart, protected: true },
     { href: `/${locale}/chat`, label: t('chat'), icon: MessageCircle, protected: true },
     { href: `/${locale}/profile`, label: t('profile'), icon: User, protected: true },

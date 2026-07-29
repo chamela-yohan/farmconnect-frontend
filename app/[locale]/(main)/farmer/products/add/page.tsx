@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/authStore";
@@ -9,16 +9,16 @@ import { ProductType, ProductFormData } from "@/types/product";
 import { ProductForm } from "@/components/products/ProductForm";
 import { ProductReview } from "@/components/products/ProductReview";
 import { SuccessModal } from "@/components/ui/SuccessModal";
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { Loader2, Lock } from "lucide-react";
 import Link from "next/link";
-import { ErrorAlert } from "@/components/ui/ErrorAlert";
 
 export default function AddProductPage() {
   const locale = useLocale();
   const t = useTranslations("products");
   const router = useRouter();
-
   const pathname = usePathname();
+  
   const { user, isHydrated } = useAuthStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -46,6 +46,7 @@ export default function AddProductPage() {
 
   const createMutation = useCreateProduct();
 
+  // 1. Wait for hydration
   if (!isHydrated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -54,6 +55,7 @@ export default function AddProductPage() {
     );
   }
 
+  // 2. Check if logged in
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
@@ -64,8 +66,7 @@ export default function AddProductPage() {
           Authentication Required
         </h1>
         <p className="text-muted-foreground mb-8 max-w-md">
-          You need to be logged in as a farmer to add new products to your
-          inventory.
+          You need to be logged in as a farmer to add new products to your inventory.
         </p>
         <Link
           href={`/${locale}/login`}
@@ -73,6 +74,26 @@ export default function AddProductPage() {
         >
           Go to Login
         </Link>
+      </div>
+    );
+  }
+
+  //  3. PRODUCTION-GRADE GUARD: Prevent non-farmers from accessing this page
+  if (user.role !== "FARMER") {
+    router.push(`/${locale}`); // Redirect to home page
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  //  4. PRODUCTION-GRADE GUARD: Prevent unverified farmers from adding products
+  if (!user.isVerified) {
+    router.push(`/${locale}/farmer/verification-pending`);
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -96,10 +117,7 @@ export default function AddProductPage() {
       await createMutation.mutateAsync(formDataPayload);
       setShowSuccessModal(true);
     } catch (error: any) {
-      // Extract the actual backend error message
       const backendMessage = error?.response?.data?.message;
-
-      // Fallback messages based on error type
       const displayMessage =
         backendMessage ||
         (error?.message === "Network Error"
@@ -113,7 +131,7 @@ export default function AddProductPage() {
 
   const handleModalClose = () => {
     setShowSuccessModal(false);
-    router.push(`/${locale}/products`);
+    router.push(`/${locale}/farmer/products`);
   };
 
   if (createMutation.isPending) {
@@ -128,7 +146,6 @@ export default function AddProductPage() {
 
   return (
     <>
-      {/* Show Error Alert if there is an error */}
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
