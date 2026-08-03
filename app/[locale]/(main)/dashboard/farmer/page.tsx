@@ -17,6 +17,8 @@ import Link from "next/link";
 
 import { RevenueChart } from "@/components/charts/RevenueChart";
 import { OrderVolumeChart } from "@/components/charts/OrderVolumeChart";
+import { RecentOrdersWidget } from "@/components/dashboard/RecentOrdersWidget";
+import { TopProductsWidget } from "@/components/dashboard/TopProductsWidget";
 
 export default function FarmerDashboardPage() {
   const { data: stats, isLoading, isError } = useFarmerDashboardStats();
@@ -172,16 +174,10 @@ export default function FarmerDashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-foreground mb-4">
-          Recent Activity
-        </h3>
-        <div className="flex items-center justify-center h-48 bg-muted/30 rounded-lg border border-dashed border-border">
-          <p className="text-muted-foreground text-sm">
-            Activity feed coming soon...
-          </p>
-        </div>
+      {/* Recent Orders + Top Products */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RecentOrdersWidget />
+        <TopProductsWidget />
       </div>
     </div>
   );

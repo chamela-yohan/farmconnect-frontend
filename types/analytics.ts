@@ -3,3 +3,10 @@ export interface MonthlyStat {
   revenue: number;
   orderCount: number;
 }
+
+export interface TopProductSummary {
+  productId: string;
+  title: string;
+  totalRevenue: number;
+  totalQuantitySold: number;
+}

@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { OrderResponse } from "@/types/order";
+import { TopProductSummary } from "@/types/analytics";
 
 export interface FarmerDashboardStats {
   totalRevenue: number;
@@ -29,6 +31,29 @@ export const useFarmerMonthlyStats = () => {
     queryFn: async () => {
       const { data } = await api.get("/farmer/analytics/monthly-stats");
       return data.data as MonthlyStat[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+
+export const useFarmerRecentOrders = () => {
+  return useQuery({
+    queryKey: ["farmer", "analytics", "recent-orders"],
+    queryFn: async () => {
+      const { data } = await api.get("/farmer/analytics/recent-orders");
+      return data.data as OrderResponse[];
+    },
+    staleTime: 1000 * 60 * 2, // shorter than the stats queries — status changes more often
+  });
+};
+
+export const useFarmerTopProducts = () => {
+  return useQuery({
+    queryKey: ["farmer", "analytics", "top-products"],
+    queryFn: async () => {
+      const { data } = await api.get("/farmer/analytics/top-products");
+      return data.data as TopProductSummary[];
     },
     staleTime: 1000 * 60 * 5,
   });
