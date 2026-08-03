@@ -20,3 +20,16 @@ export const useFarmerDashboardStats = () => {
     staleTime: 1000 * 60 * 5, 
   });
 };
+
+import { MonthlyStat } from "@/types/analytics";
+
+export const useFarmerMonthlyStats = () => {
+  return useQuery({
+    queryKey: ["farmer", "analytics", "monthly-stats"],
+    queryFn: async () => {
+      const { data } = await api.get("/farmer/analytics/monthly-stats");
+      return data.data as MonthlyStat[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
