@@ -287,3 +287,15 @@ export const useKeywordSuggestions = (query: string) => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
+
+
+export const useProductCategories = () => {
+  return useQuery({
+    queryKey: ["products", "categories"],
+    queryFn: async () => {
+      const { data } = await api.get("/products/categories");
+      return data.data as Category[];
+    },
+    staleTime: 1000 * 60 * 30, // categories change rarely
+  });
+};

@@ -1,9 +1,4 @@
 {
-  "home": {
-    "title": "Fresh from Local Farms",
-    "subtitle": "Discover quality produce from farmers near you",
-    "error": "Failed to load products. Please try again."
-  },
   "common": {
     "email": "Email Address",
     "password": "Password",
@@ -57,7 +52,24 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "products": "Products",
-    "cart" : "cart"
+    "cart" : "cart",
+    "browse": "Browse Produce",
+    "forFarmers": "For Farmers"
+  },
+  "home": {
+    "heroEyebrow": "Sri Lanka's Farm-to-Table Marketplace",
+    "heroTitle": "Fresh From Our Farms, Straight To Your Door",
+    "heroSubtitle": "Buy fresh produce directly from verified Sri Lankan farmers — no middlemen, fair prices, real freshness.",
+    "heroCtaBrowse": "Browse Fresh Produce",
+    "heroCtaSell": "Sell With Us",
+    "trustVerified": "Verified Farmers",
+    "trustFresh": "Fresh Daily Harvests",
+    "trustDirect": "Direct From Source",
+    "categoriesTitle": "Shop by Category",
+    "categoriesEmpty": "Categories will appear here as farmers list their harvest",
+    "title": "Fresh from Local Farms",
+    "subtitle": "Discover quality produce from farmers near you",
+    "error": "Failed to load products. Please try again."
   },
 
   "products": {
