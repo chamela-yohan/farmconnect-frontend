@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, ShieldCheck, Sprout, Truck } from "lucide-react";
+import { HeroIllustration } from "./HeroIllustration";
 
 export function HeroSection() {
   const locale = useLocale();
@@ -54,11 +55,8 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-secondary/10 to-primary/5 border border-border">
-            {/* Swap for a real photo once you have one: <Image src="/images/hero-produce.jpg" alt="" fill className="object-cover" /> */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Sprout className="w-24 h-24 text-primary/40" strokeWidth={1} />
-            </div>
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent border border-border">
+            <HeroIllustration />
           </div>
         </div>
       </div>

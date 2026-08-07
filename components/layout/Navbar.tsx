@@ -9,6 +9,7 @@ import { Leaf, ShoppingCart, LogOut, Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { Logo } from "./Logo";
 
 export function Navbar() {
   const { user, logout } = useAuthStore();
@@ -33,9 +34,15 @@ export function Navbar() {
       <header className="sticky top-0 z-30 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center gap-2 font-bold text-xl text-primary shrink-0">
-            <Leaf className="w-6 h-6" />
-            <span className="hidden sm:inline">FarmConnect</span>
+          <Link
+            href={`/${locale}`}
+            className="flex items-center gap-2 shrink-0"
+          >
+            <Logo />
+            <span className="hidden sm:inline font-bold text-xl">
+              <span className="text-foreground">Farm</span>
+              <span className="text-primary">Connect</span>
+            </span>
           </Link>
 
           {/* Center nav — this is the space that was going empty */}
@@ -74,11 +81,16 @@ export function Navbar() {
 
             {user ? (
               <>
-                <Link href={`/${locale}/profile`} className="hidden sm:flex items-center gap-2">
+                <Link
+                  href={`/${locale}/profile`}
+                  className="hidden sm:flex items-center gap-2"
+                >
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
                     {user.name?.charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden md:inline-block text-sm font-medium">{user.name}</span>
+                  <span className="hidden md:inline-block text-sm font-medium">
+                    {user.name}
+                  </span>
                 </Link>
                 <button
                   onClick={logout}
@@ -104,7 +116,11 @@ export function Navbar() {
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
@@ -117,7 +133,9 @@ export function Navbar() {
                 href={link.href}
                 onClick={() => setIsMenuOpen(false)}
                 className={`block px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive(link.href) ? "text-primary bg-primary/10" : "text-foreground hover:bg-muted"
+                  isActive(link.href)
+                    ? "text-primary bg-primary/10"
+                    : "text-foreground hover:bg-muted"
                 }`}
               >
                 {link.label}
