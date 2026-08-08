@@ -47,6 +47,7 @@
   },
   "nav": {
     "home": "Home",
+    "login": "Login",
     "orders": "Orders",
     "chat": "Chat",
     "profile": "Profile",

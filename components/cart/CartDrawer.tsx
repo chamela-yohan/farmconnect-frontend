@@ -14,20 +14,29 @@ interface CartDrawerProps {
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const locale = useLocale();
-  const { data: cart, isLoading } = useCart();
+  const { data: cart, isLoading } = useCart(isOpen);
   const removeMutation = useRemoveFromCart();
   const updateMutation = useUpdateCartItem();
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-LK", { style: "currency", currency: "LKR", minimumFractionDigits: 0 }).format(price);
+    new Intl.NumberFormat("en-LK", {
+      style: "currency",
+      currency: "LKR",
+      minimumFractionDigits: 0,
+    }).format(price);
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-background border-l border-border z-50 transform transition-transform ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+      )}
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-background border-l border-border z-50 transform transition-transform ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" /> Your Cart ({cart?.totalItems || 0})
+            <ShoppingCart className="w-5 h-5" /> Your Cart (
+            {cart?.totalItems || 0})
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
             <X className="w-5 h-5" />
@@ -41,14 +50,23 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
           ) : cart && cart.items.length > 0 ? (
             cart.items.map((item) => {
-              const step = item.qtyStep && item.qtyStep > 0 ? Number(item.qtyStep) : 1;
+              const step =
+                item.qtyStep && item.qtyStep > 0 ? Number(item.qtyStep) : 1;
               const currentQty = Number(item.quantity);
 
               return (
-                <div key={item.id} className="flex gap-4 p-3 bg-card border border-border rounded-lg">
+                <div
+                  key={item.id}
+                  className="flex gap-4 p-3 bg-card border border-border rounded-lg"
+                >
                   <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
                     {item.imageUrls?.[0] ? (
-                      <Image src={item.imageUrls[0]} alt={item.productTitle} fill className="object-cover" />
+                      <Image
+                        src={item.imageUrls[0]}
+                        alt={item.productTitle}
+                        fill
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <ShoppingCart className="w-8 h-8 opacity-30" />
@@ -58,27 +76,39 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
-                      <Link href={`/${locale}/products/${item.productId}`} onClick={onClose}>
+                      <Link
+                        href={`/${locale}/products/${item.productId}`}
+                        onClick={onClose}
+                      >
                         <h3 className="font-medium text-sm text-foreground truncate hover:text-primary">
                           {item.productTitle}
                         </h3>
                       </Link>
                       <p className="text-xs text-muted-foreground mt-1 capitalize">
-                        {item.productType ? item.productType.replace(/_/g, " ") : "Product"}
+                        {item.productType
+                          ? item.productType.replace(/_/g, " ")
+                          : "Product"}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
-                      <span className="font-semibold text-primary text-sm">{formatPrice(item.subtotal)}</span>
+                      <span className="font-semibold text-primary text-sm">
+                        {formatPrice(item.subtotal)}
+                      </span>
 
                       <div className="flex items-center gap-2">
                         {/* Quantity Stepper */}
                         <div className="flex items-center border border-border rounded-md overflow-hidden">
                           <button
                             onClick={async () => {
-                              const step = item.qtyStep && item.qtyStep > 0 ? Number(item.qtyStep) : 1;
-                              const minQty = item.minOrderQty ? Number(item.minOrderQty) : 1;
-                              
+                              const step =
+                                item.qtyStep && item.qtyStep > 0
+                                  ? Number(item.qtyStep)
+                                  : 1;
+                              const minQty = item.minOrderQty
+                                ? Number(item.minOrderQty)
+                                : 1;
+
                               let newQty = currentQty - step;
 
                               //FIX: Cleanly handle dropping below minimum
@@ -91,59 +121,103 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 }
                               }
 
-                              if (item.maxOrderQty && newQty > Number(item.maxOrderQty)) {
-                                toast.error(`Maximum order is ${item.maxOrderQty}`);
+                              if (
+                                item.maxOrderQty &&
+                                newQty > Number(item.maxOrderQty)
+                              ) {
+                                toast.error(
+                                  `Maximum order is ${item.maxOrderQty}`,
+                                );
                                 return;
                               }
-                              if (item.availableStock && newQty > Number(item.availableStock)) {
+                              if (
+                                item.availableStock &&
+                                newQty > Number(item.availableStock)
+                              ) {
                                 toast.error("Insufficient stock available.");
                                 return;
                               }
 
                               try {
-                                await updateMutation.mutateAsync({ itemId: item.id, quantity: newQty });
+                                await updateMutation.mutateAsync({
+                                  itemId: item.id,
+                                  quantity: newQty,
+                                });
                               } catch (error: any) {
-                                toast.error(error.response?.data?.message || "Failed to update quantity.");
+                                toast.error(
+                                  error.response?.data?.message ||
+                                    "Failed to update quantity.",
+                                );
                               }
                             }}
-                            disabled={updateMutation.isPending || removeMutation.isPending}
+                            disabled={
+                              updateMutation.isPending ||
+                              removeMutation.isPending
+                            }
                             className="w-7 h-7 flex items-center justify-center hover:bg-muted disabled:opacity-50"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
 
                           <span className="w-12 text-center text-sm font-medium">
-                            {updateMutation.isPending ? "..." : (currentQty % 1 === 0 ? currentQty : currentQty.toFixed(1))}
+                            {updateMutation.isPending
+                              ? "..."
+                              : currentQty % 1 === 0
+                                ? currentQty
+                                : currentQty.toFixed(1)}
                           </span>
 
                           <button
                             onClick={async () => {
-                              const step = item.qtyStep && item.qtyStep > 0 ? Number(item.qtyStep) : 1;
+                              const step =
+                                item.qtyStep && item.qtyStep > 0
+                                  ? Number(item.qtyStep)
+                                  : 1;
                               const newQty = currentQty + step;
 
-                              if (item.maxOrderQty && newQty > Number(item.maxOrderQty)) {
-                                toast.error(`Maximum order is ${item.maxOrderQty}`);
+                              if (
+                                item.maxOrderQty &&
+                                newQty > Number(item.maxOrderQty)
+                              ) {
+                                toast.error(
+                                  `Maximum order is ${item.maxOrderQty}`,
+                                );
                                 return;
                               }
-                              if (item.availableStock && newQty > Number(item.availableStock)) {
+                              if (
+                                item.availableStock &&
+                                newQty > Number(item.availableStock)
+                              ) {
                                 toast.error("Insufficient stock available.");
                                 return;
                               }
 
                               try {
-                                await updateMutation.mutateAsync({ itemId: item.id, quantity: newQty });
+                                await updateMutation.mutateAsync({
+                                  itemId: item.id,
+                                  quantity: newQty,
+                                });
                               } catch (error: any) {
-                                toast.error(error.response?.data?.message || "Failed to update quantity.");
+                                toast.error(
+                                  error.response?.data?.message ||
+                                    "Failed to update quantity.",
+                                );
                               }
                             }}
-                            disabled={updateMutation.isPending || removeMutation.isPending}
+                            disabled={
+                              updateMutation.isPending ||
+                              removeMutation.isPending
+                            }
                             className="w-7 h-7 flex items-center justify-center hover:bg-muted disabled:opacity-50"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
 
-                        <button onClick={() => removeMutation.mutate(item.id)} className="text-destructive hover:text-destructive/80 p-1">
+                        <button
+                          onClick={() => removeMutation.mutate(item.id)}
+                          className="text-destructive hover:text-destructive/80 p-1"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -164,9 +238,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background">
             <div className="flex justify-between items-center mb-4">
               <span className="text-muted-foreground">Total</span>
-              <span className="text-xl font-bold">{formatPrice(cart.totalAmount)}</span>
+              <span className="text-xl font-bold">
+                {formatPrice(cart.totalAmount)}
+              </span>
             </div>
-            <Link href={`/${locale}/checkout`} onClick={onClose} className="block w-full bg-primary text-primary-foreground text-center py-3 rounded-lg font-semibold hover:bg-primary/90">
+            <Link
+              href={`/${locale}/checkout`}
+              onClick={onClose}
+              className="block w-full bg-primary text-primary-foreground text-center py-3 rounded-lg font-semibold hover:bg-primary/90"
+            >
               Proceed to Checkout
             </Link>
           </div>

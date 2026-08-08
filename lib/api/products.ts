@@ -291,7 +291,7 @@ export const useKeywordSuggestions = (query: string) => {
 
 export const useProductCategories = () => {
   return useQuery({
-    queryKey: ["products", "categories"],
+    queryKey: ["categories"],
     queryFn: async () => {
       const { data } = await api.get("/products/categories");
       return data.data as Category[];

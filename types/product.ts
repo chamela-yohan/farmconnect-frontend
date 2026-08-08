@@ -139,6 +139,7 @@ export interface ProductFormData {
 export interface Category {
   id: string;
   name: string;
+  iconUrl: string;
   slug: string;
 }
 

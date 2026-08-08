@@ -239,15 +239,15 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
               </button>
               {categories.map((category) => (
                 <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    filters.category === category
+                    filters.category === category.id
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-foreground hover:bg-muted/80'
                   }`}
                 >
-                  {category}
+                  {category.name}
                 </button>
               ))}
             </div>

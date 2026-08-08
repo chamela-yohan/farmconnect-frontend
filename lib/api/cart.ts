@@ -2,16 +2,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api'; // Your configured axios instance
 import { CartResponse, AddToCartRequest } from '@/types/cart';
+import { useAuthStore } from '@/stores/authStore';
 
 // --- GET CART ---
-export const useCart = () => {
+export const useCart = (enabled: boolean = true) => {
+  const { user } = useAuthStore();
+
   return useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
       const { data } = await api.get('/cart');
       return data.data as CartResponse;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user && enabled,
   });
 };
 
