@@ -8,6 +8,8 @@ import {
   ProductSearchCriteria,
 } from "@/types/product";
 import { Category } from "@/types/product";
+import { Page } from "@/types/common";
+
 
 // // --- FETCH PRODUCTS WITH FILTERS (Search API) ---
 // export const useProducts = (filters: ProductFilter) => {
@@ -297,5 +299,20 @@ export const useProductCategories = () => {
       return data.data as Category[];
     },
     staleTime: 1000 * 60 * 30, // categories change rarely
+  });
+};
+
+
+
+export const useFreshListings = () => {
+  return useQuery({
+    queryKey: ["products", "fresh-listings"],
+    queryFn: async () => {
+      const { data } = await api.get("/products/search", {
+        params: { sortBy: "createdAt", sortDir: "DESC", page: 0, size: 8 },
+      });
+      return data.data as Page<Product>;
+    },
+    staleTime: 1000 * 60 * 5,
   });
 };

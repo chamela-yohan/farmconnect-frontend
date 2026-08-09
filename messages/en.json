@@ -53,7 +53,7 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "products": "Products",
-    "cart" : "cart",
+    "cart": "cart",
     "browse": "Browse Produce",
     "forFarmers": "For Farmers"
   },
@@ -70,7 +70,13 @@
     "categoriesEmpty": "Categories will appear here as farmers list their harvest",
     "title": "Fresh from Local Farms",
     "subtitle": "Discover quality produce from farmers near you",
-    "error": "Failed to load products. Please try again."
+    "error": "Failed to load products. Please try again.",
+    "freshListingsTitle": "Fresh Listings",
+    "freshListingsViewAll": "View All",
+    "freshListingsEmpty": "No products listed yet — check back soon",
+    "todaysPickBadge": "Today's Pick",
+    "todaysPickCta": "View Product",
+    "todaysPickFallbackDescription": "A hand-picked product from our farmers."
   },
 
   "products": {
@@ -133,7 +139,7 @@
       "noProductsDescription": "Start by adding your first product",
       "addFirstProduct": "Add Your First Product"
     },
-     "add": {
+    "add": {
       "title": "Add New Product",
       "step1": "Product Details & Images",
       "step2": "Review & Submit",
@@ -160,7 +166,7 @@
       "video": "Product Video",
       "next": "Continue to Review"
     },
-     "review": {
+    "review": {
       "title": "Review Your Product",
       "productType": "Product Type",
       "description": "Description",
