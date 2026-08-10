@@ -19,6 +19,7 @@ import {
   PackageOpen,
   MapPin,
   Truck,
+  X,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,6 +27,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function SearchPage() {
   const locale = useLocale();
   const queryClient = useQueryClient();
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [sortBy, setSortBy] = useState<string>("created_at");
   const [sortDir, setSortDir] = useState<string>("DESC");
@@ -223,19 +225,43 @@ export default function SearchPage() {
         Search Products
       </h1>
 
+      {showMobileFilters && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setShowMobileFilters(false)}
+        />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* --- LEFT SIDEBAR: FILTERS --- */}
-        <aside className="lg:col-span-1 space-y-6 bg-card p-4 rounded-xl border border-border h-fit sticky top-24">
+        <aside
+          className={`
+              fixed inset-y-0 left-0 z-50 w-[85%] max-w-sm overflow-y-auto
+              bg-card p-4 border-r border-border space-y-6
+              transition-transform duration-300 ease-in-out
+              ${showMobileFilters ? "translate-x-0" : "-translate-x-full"}
+              lg:static lg:z-auto lg:w-auto lg:max-w-none lg:translate-x-0 lg:transition-none
+              lg:col-span-1 lg:h-fit lg:sticky lg:top-24 lg:rounded-xl lg:border
+            `}
+        >
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <SlidersHorizontal className="w-5 h-5" /> Filters
             </h2>
-            <button
-              onClick={handleClearFilters}
-              className="text-xs text-primary hover:underline"
-            >
-              Clear All
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleClearFilters}
+                className="text-xs text-primary hover:underline"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="lg:hidden p-1 hover:bg-muted rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -473,6 +499,20 @@ export default function SearchPage() {
 
         {/* --- RIGHT CONTENT: PRODUCT GRID --- */}
         <main className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-4 lg:hidden">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="flex items-center gap-2 h-10 px-4 bg-card border border-border rounded-lg text-sm font-medium"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filters
+            </button>
+            {data && (
+              <p className="text-sm text-muted-foreground">
+                {data.totalElements} results
+              </p>
+            )}
+          </div>
           {isLocating || isLoading ? (
             <div className="flex items-center justify-center h-96">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />

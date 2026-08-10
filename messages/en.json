@@ -78,6 +78,20 @@
     "todaysPickCta": "View Product",
     "todaysPickFallbackDescription": "A hand-picked product from our farmers."
   },
+  "footer": {
+    "tagline": "Connecting Sri Lankan farmers directly with buyers — fresh produce, fair prices, no middlemen.",
+    "marketplaceHeading": "Marketplace",
+    "home": "Home",
+    "browse": "Browse Produce",
+    "forFarmers": "For Farmers",
+    "categoriesHeading": "Categories",
+    "stayUpdatedHeading": "Stay Updated",
+    "stayUpdatedText": "Get notified about new harvests and farmers near you.",
+    "emailPlaceholder": "Your email",
+    "subscribe": "Subscribe",
+    "copyright": "© {year} FarmConnect. All rights reserved.",
+    "madeIn": "Made with care in Sri Lanka 🇱🇰"
+  },
 
   "products": {
     "search": {

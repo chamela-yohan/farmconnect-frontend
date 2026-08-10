@@ -1,22 +1,31 @@
 "use client";
 
-import { Search, Filter, X, MapPin, Navigation } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { useCategories } from '@/lib/api/products';
-import { ProductFilter, ProductType } from '@/types/product';
-import { useGeolocation } from '@/hooks/useGeolocation';
+import { Search, Filter, X, MapPin, Navigation } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
+import { useCategories } from "@/lib/api/products";
+import { ProductFilter, ProductType } from "@/types/product";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 interface SearchFilterBarProps {
   filters: ProductFilter;
   onFilterChange: (filters: ProductFilter) => void;
 }
 
-export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProps) {
-  const t = useTranslations('products');
+export function SearchFilterBar({
+  filters,
+  onFilterChange,
+}: SearchFilterBarProps) {
+  const t = useTranslations("products");
   const { data: categories = [] } = useCategories();
   const [showFilters, setShowFilters] = useState(false);
-  const { location, loading: locationLoading, error: locationError, requestLocation, hasPermission } = useGeolocation();
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+    requestLocation,
+    hasPermission,
+  } = useGeolocation();
 
   const handleSearchChange = (value: string) => {
     onFilterChange({ ...filters, search: value, page: 0 });
@@ -31,7 +40,11 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
   };
 
   const handleSortChange = (sortBy: string) => {
-    onFilterChange({ ...filters, sortBy: sortBy as ProductFilter['sortBy'] || undefined, page: 0 });
+    onFilterChange({
+      ...filters,
+      sortBy: (sortBy as ProductFilter["sortBy"]) || undefined,
+      page: 0,
+    });
   };
 
   const handleRadiusChange = (radius: number) => {
@@ -42,7 +55,9 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
     onFilterChange({ ...filters, minPrice, maxPrice, page: 0 });
   };
 
-  const handleDeliveryFilterChange = (isDeliveryAvailable: boolean | undefined) => {
+  const handleDeliveryFilterChange = (
+    isDeliveryAvailable: boolean | undefined,
+  ) => {
     onFilterChange({ ...filters, isDeliveryAvailable, page: 0 });
   };
 
@@ -62,17 +77,23 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
   }, [location]);
 
   const clearFilters = () => {
-    onFilterChange({ 
-      page: 0, 
+    onFilterChange({
+      page: 0,
       size: 12,
       latitude: location?.latitude,
       longitude: location?.longitude,
     });
   };
 
-  const hasActiveFilters = filters.search || filters.category || filters.productType || 
-                          filters.sortBy || filters.radiusKm || filters.minPrice || 
-                          filters.maxPrice || filters.isDeliveryAvailable !== undefined;
+  const hasActiveFilters =
+    filters.search ||
+    filters.category ||
+    filters.productType ||
+    filters.sortBy ||
+    filters.radiusKm ||
+    filters.minPrice ||
+    filters.maxPrice ||
+    filters.isDeliveryAvailable !== undefined;
 
   return (
     <div className="space-y-3">
@@ -82,8 +103,8 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder={t('search.placeholder')}
-            value={filters.search || ''}
+            placeholder={t("search.placeholder")}
+            value={filters.search || ""}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full h-11 pl-10 pr-4 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
           />
@@ -92,12 +113,12 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           onClick={() => setShowFilters(!showFilters)}
           className={`h-11 px-4 rounded-lg border transition-colors flex items-center gap-2 ${
             showFilters || hasActiveFilters
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-card border-border text-foreground hover:bg-muted'
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border text-foreground hover:bg-muted"
           }`}
         >
           <Filter className="w-5 h-5" />
-          <span className="hidden sm:inline">{t('filters.button')}</span>
+          <span className="hidden sm:inline">{t("filters.button")}</span>
         </button>
       </div>
 
@@ -114,48 +135,50 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           {/* Product Type Filter */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
-              {t('filters.productType')}
+              {t("filters.productType")}
             </label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleProductTypeChange(undefined)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   !filters.productType
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/80"
                 }`}
               >
-                {t('filters.all')}
+                {t("filters.all")}
               </button>
               <button
-                onClick={() => handleProductTypeChange(ProductType.PHYSICAL_GOOD)}
+                onClick={() =>
+                  handleProductTypeChange(ProductType.PHYSICAL_GOOD)
+                }
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   filters.productType === ProductType.PHYSICAL_GOOD
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/80"
                 }`}
               >
-                🍎 {t('filters.physicalGoods')}
+                🍎 {t("filters.physicalGoods")}
               </button>
               <button
                 onClick={() => handleProductTypeChange(ProductType.RENTABLE)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   filters.productType === ProductType.RENTABLE
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/80"
                 }`}
               >
-                🔧 {t('filters.rentable')}
+                🔧 {t("filters.rentable")}
               </button>
               <button
                 onClick={() => handleProductTypeChange(ProductType.SERVICE)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   filters.productType === ProductType.SERVICE
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/80"
                 }`}
               >
-                👨‍🌾 {t('filters.services')}
+                👨‍🌾 {t("filters.services")}
               </button>
             </div>
           </div>
@@ -163,18 +186,19 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           {/* Location Section */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
-              {t('filters.location')}
+              {t("filters.location")}
             </label>
-            
+
             {hasPermission && location ? (
               <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg">
                 <MapPin className="w-5 h-5 text-primary" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    {t('filters.usingCurrentLocation')}
+                    {t("filters.usingCurrentLocation")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+                    {location.latitude.toFixed(4)},{" "}
+                    {location.longitude.toFixed(4)}
                   </p>
                 </div>
                 <button
@@ -182,7 +206,9 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
                   disabled={locationLoading}
                   className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {locationLoading ? t('filters.updating') : t('filters.refresh')}
+                  {locationLoading
+                    ? t("filters.updating")
+                    : t("filters.refresh")}
                 </button>
               </div>
             ) : (
@@ -193,7 +219,9 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
               >
                 <Navigation className="w-5 h-5" />
                 <span className="font-medium">
-                  {locationLoading ? t('filters.gettingLocation') : t('filters.useMyLocation')}
+                  {locationLoading
+                    ? t("filters.gettingLocation")
+                    : t("filters.useMyLocation")}
                 </span>
               </button>
             )}
@@ -202,7 +230,7 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
             {hasPermission && location && (
               <div className="mt-3">
                 <label className="text-sm text-muted-foreground mb-2 block">
-                  {t('filters.searchRadius')}: {filters.radiusKm || 50} km
+                  {t("filters.searchRadius")}: {filters.radiusKm || 50} km
                 </label>
                 <input
                   type="range"
@@ -222,68 +250,71 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           </div>
 
           {/* Categories */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
-              {t('filters.category')}
-            </label>
-            <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <button
+              onClick={() => handleCategoryChange("")}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                !filters.category
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              }`}
+            >
+              {t("filters.all")}
+            </button>
+            {categories.map((category) => (
               <button
-                onClick={() => handleCategoryChange('')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  !filters.category
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
+                key={category.id}
+                onClick={() => handleCategoryChange(category.id)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  filters.category === category.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/80"
                 }`}
               >
-                {t('filters.all')}
+                {category.name}
               </button>
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => handleCategoryChange(category.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    filters.category === category.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
 
           {/* Price Range */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
-              {t('filters.priceRange')}
+              {t("filters.priceRange")}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Min
+                </label>
                 <input
                   type="number"
                   min="0"
                   placeholder="0"
-                  value={filters.minPrice || ''}
-                  onChange={(e) => handlePriceRangeChange(
-                    e.target.value ? Number(e.target.value) : undefined,
-                    filters.maxPrice
-                  )}
+                  value={filters.minPrice || ""}
+                  onChange={(e) =>
+                    handlePriceRangeChange(
+                      e.target.value ? Number(e.target.value) : undefined,
+                      filters.maxPrice,
+                    )
+                  }
                   className="w-full h-10 px-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Max
+                </label>
                 <input
                   type="number"
                   min="0"
                   placeholder="10000"
-                  value={filters.maxPrice || ''}
-                  onChange={(e) => handlePriceRangeChange(
-                    filters.minPrice,
-                    e.target.value ? Number(e.target.value) : undefined
-                  )}
+                  value={filters.maxPrice || ""}
+                  onChange={(e) =>
+                    handlePriceRangeChange(
+                      filters.minPrice,
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className="w-full h-10 px-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -296,11 +327,15 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
               <input
                 type="checkbox"
                 checked={filters.isDeliveryAvailable === true}
-                onChange={(e) => handleDeliveryFilterChange(e.target.checked ? true : undefined)}
+                onChange={(e) =>
+                  handleDeliveryFilterChange(
+                    e.target.checked ? true : undefined,
+                  )
+                }
                 className="w-4 h-4 rounded border-border"
               />
               <span className="text-sm font-medium text-foreground">
-                {t('filters.deliveryAvailable')}
+                {t("filters.deliveryAvailable")}
               </span>
             </label>
           </div>
@@ -308,18 +343,18 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
           {/* Sort */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
-              {t('filters.sortBy')}
+              {t("filters.sortBy")}
             </label>
             <select
-              value={filters.sortBy || ''}
+              value={filters.sortBy || ""}
               onChange={(e) => handleSortChange(e.target.value)}
               className="w-full h-10 px-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="">{t('filters.default')}</option>
-              <option value="price_asc">{t('filters.priceLowToHigh')}</option>
-              <option value="price_desc">{t('filters.priceHighToLow')}</option>
-              <option value="newest">{t('filters.newest')}</option>
-              <option value="distance">{t('filters.nearest')}</option>
+              <option value="">{t("filters.default")}</option>
+              <option value="price_asc">{t("filters.priceLowToHigh")}</option>
+              <option value="price_desc">{t("filters.priceHighToLow")}</option>
+              <option value="newest">{t("filters.newest")}</option>
+              <option value="distance">{t("filters.nearest")}</option>
             </select>
           </div>
 
@@ -330,7 +365,7 @@ export function SearchFilterBar({ filters, onFilterChange }: SearchFilterBarProp
               className="w-full h-10 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <X className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('filters.clear')}</span>
+              <span className="text-sm font-medium">{t("filters.clear")}</span>
             </button>
           )}
         </div>
