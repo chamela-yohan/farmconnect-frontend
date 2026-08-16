@@ -1,17 +1,16 @@
 export enum ProductType {
-  PHYSICAL_GOOD = 'PHYSICAL_GOOD',
-  RENTABLE = 'RENTABLE',
-  SERVICE = 'SERVICE',
+  PHYSICAL_GOOD = "PHYSICAL_GOOD",
+  RENTABLE = "RENTABLE",
+  SERVICE = "SERVICE",
 }
 
 export enum ProductStatus {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  ACTIVE = 'ACTIVE',
-  OUT_OF_STOCK = 'OUT_OF_STOCK',
-  SUSPENDED = 'SUSPENDED',
+  DRAFT = "DRAFT",
+  PENDING_APPROVAL = "PENDING_APPROVAL",
+  ACTIVE = "ACTIVE",
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+  SUSPENDED = "SUSPENDED",
 }
-
 
 // Matches backend District entity (simplified for delivery areas)
 export interface District {
@@ -27,6 +26,12 @@ export interface ProductLocation {
   cityName: string;
   districtId: number;
   districtName: string | null; // Allow null so TypeScript doesn't complain
+}
+
+export interface ProductImageDetail {
+  id: string;
+  url: string;
+  displayOrder: number;
 }
 
 // 2. Update the main Product interface
@@ -52,6 +57,7 @@ export interface Product {
   attributes?: Record<string, any>;
 
   imageUrls: string[];
+  imageDetails: ProductImageDetail[]; 
   videoUrl?: string | null;
 
   // Match the exact JSON keys
@@ -79,7 +85,7 @@ export interface ProductFilter {
   radiusKm?: number;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: 'createdAt' | 'price_asc' | 'price_desc' | 'distance' | 'newest';
+  sortBy?: "createdAt" | "price_asc" | "price_desc" | "distance" | "newest";
   isDeliveryAvailable?: boolean;
 }
 
@@ -97,43 +103,43 @@ export interface ProductFormData {
   description: string;
   price: number;
   productType: ProductType;
-  
+
   // Common Trading Rules (Apply to all types)
   minOrderQty?: number;
   maxOrderQty?: number;
   qtyStep?: number;
-  
+
   // Delivery
   isDeliveryAvailable: boolean;
   deliveryFee?: number;
-  
+
   // Physical Good Specifics (Stored in JSONB 'attributes')
   availableStock?: number;
   unit?: string;
   expiryDate?: string; // ISO Date string (YYYY-MM-DD)
-  
+
   // Rentable Specifics (Stored in JSONB 'attributes')
   rentalPricePerDay?: number;
   depositAmount?: number;
-  
+
   // Unified Rental/Service Bounds (Stored in JSONB 'attributes')
   // Replaces old minRentalDays, maxRentalDays, and serviceDurationHours
   minRental?: number; // e.g., Min 1 day for tractor, Min 2 hours for service
   maxRental?: number; // e.g., Max 30 days for tractor, Max 8 hours for service
-  
-   availableUnits?: number;
+
+  availableUnits?: number;
 
   // Flexible JSON Data (Holds 'category' and other custom attributes)
-  attributes?: Record<string, any>; 
+  attributes?: Record<string, any>;
 
-  categoryId?: string; 
-  
+  categoryId?: string;
+
   selectedProvinceId?: number;
   selectedDistrictId?: number;
   locationCityIds?: number[]; // Array of city IDs
-  
+
   // Delivery Areas (Multiple Districts)
-  deliveryDistrictIds?: number[]
+  deliveryDistrictIds?: number[];
 }
 
 export interface Category {
@@ -142,7 +148,6 @@ export interface Category {
   iconUrl: string;
   slug: string;
 }
-
 
 export interface ProductSearchCriteria {
   keyword?: string;
@@ -153,11 +158,11 @@ export interface ProductSearchCriteria {
   lat?: number;
   lon?: number;
   radiusKm?: number;
-  isDeliveryAvailable?:boolean
+  isDeliveryAvailable?: boolean;
   deliveryDistrictId?: number;
-  locationDistrictId?:number;
+  locationDistrictId?: number;
   page?: number;
   size?: number;
   sortBy?: string;
-  sortDir?: 'ASC' | 'DESC';
+  sortDir?: "ASC" | "DESC";
 }

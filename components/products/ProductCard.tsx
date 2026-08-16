@@ -162,7 +162,7 @@ export function ProductCard({ product, showActions = false, onDelete }: ProductC
       {showActions && (
         <div className="flex gap-2 p-3 pt-0">
           <Link
-            href={`/${locale}/products/${product.id}/edit`}
+            href={`/${locale}/farmer/products/${product.id}/edit`}
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors"
           >
             <Edit className="w-4 h-4" />

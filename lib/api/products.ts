@@ -9,7 +9,7 @@ import {
 } from "@/types/product";
 import { Category } from "@/types/product";
 import { Page } from "@/types/common";
-
+import { ProductFormData, ProductType } from "@/types/product";
 
 // // --- FETCH PRODUCTS WITH FILTERS (Search API) ---
 // export const useProducts = (filters: ProductFilter) => {
@@ -106,28 +106,28 @@ export const useCreateProduct = () => {
   });
 };
 
-// --- UPDATE PRODUCT ---
-export const useUpdateProduct = () => {
-  const queryClient = useQueryClient();
+// // --- UPDATE PRODUCT ---
+// export const useUpdateProduct = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      id,
-      formData,
-    }: {
-      id: string;
-      formData: FormData;
-    }) => {
-      const { data } = await api.put(`/products/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return data.data as Product;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["farmer-products"] });
-    },
-  });
-};
+//   return useMutation({
+//     mutationFn: async ({
+//       id,
+//       formData,
+//     }: {
+//       id: string;
+//       formData: FormData;
+//     }) => {
+//       const { data } = await api.put(`/products/${id}`, formData, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       });
+//       return data.data as Product;
+//     },
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["farmer-products"] });
+//     },
+//   });
+// };
 
 // --- DELETE PRODUCT ---
 export const useDeleteProduct = () => {
@@ -147,41 +147,81 @@ export const useDeleteProduct = () => {
 // This is crucial for matching your backend's @RequestParam("product") String productJson
 // lib/api/products.ts
 
-import { ProductFormData, ProductType } from "@/types/product";
+export const buildProductAttributes = (
+  productData: ProductFormData,
+): Record<string, any> => {
+  const attributes: Record<string, any> = {};
+
+  if (productData.productType === ProductType.PHYSICAL_GOOD) {
+    if (productData.availableStock)
+      attributes.availableStock = Number(productData.availableStock);
+    if (productData.unit) attributes.unit = productData.unit;
+    if (productData.expiryDate) attributes.expiryDate = productData.expiryDate;
+  } else if (productData.productType === ProductType.RENTABLE) {
+    if (productData.availableStock)
+      attributes.availableUnits = Number(productData.availableStock);
+    if (productData.rentalPricePerDay)
+      attributes.rentalPricePerDay = Number(productData.rentalPricePerDay);
+    if (productData.depositAmount)
+      attributes.depositAmount = Number(productData.depositAmount);
+    if (productData.minRental)
+      attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental)
+      attributes.maxRental = Number(productData.maxRental);
+    attributes.unit = "pcs";
+  } else if (productData.productType === ProductType.SERVICE) {
+    if (productData.availableStock)
+      attributes.availableUnits = Number(productData.availableStock);
+    if (productData.minRental)
+      attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental)
+      attributes.maxRental = Number(productData.maxRental);
+    if (productData.unit) attributes.unit = productData.unit;
+  }
+
+  return attributes;
+};
 
 export const prepareProductFormData = (
   productData: ProductFormData,
   images: File[],
-  video?: File
+  video?: File,
 ): FormData => {
   const formData = new FormData();
-  const attributes: Record<string, any> = {};
+  const attributes = buildProductAttributes(productData);
 
   // ==========================================
   // 1. BUILD ATTRIBUTES BASED ON PRODUCT TYPE
   // ==========================================
   if (productData.productType === ProductType.PHYSICAL_GOOD) {
-    if (productData.availableStock) attributes.availableStock = Number(productData.availableStock);
+    if (productData.availableStock)
+      attributes.availableStock = Number(productData.availableStock);
     if (productData.unit) attributes.unit = productData.unit;
     if (productData.expiryDate) attributes.expiryDate = productData.expiryDate;
-  } 
-  else if (productData.productType === ProductType.RENTABLE) {
+  } else if (productData.productType === ProductType.RENTABLE) {
     // Map the UI's 'availableStock' input to 'availableUnits' for backend capacity checks
-    if (productData.availableStock) attributes.availableUnits = Number(productData.availableStock);
-    
-    if (productData.rentalPricePerDay) attributes.rentalPricePerDay = Number(productData.rentalPricePerDay);
-    if (productData.depositAmount) attributes.depositAmount = Number(productData.depositAmount);
-    if (productData.minRental) attributes.minRental = Number(productData.minRental);
-    if (productData.maxRental) attributes.maxRental = Number(productData.maxRental);
-    
+    if (productData.availableStock)
+      attributes.availableUnits = Number(productData.availableStock);
+
+    if (productData.rentalPricePerDay)
+      attributes.rentalPricePerDay = Number(productData.rentalPricePerDay);
+    if (productData.depositAmount)
+      attributes.depositAmount = Number(productData.depositAmount);
+    if (productData.minRental)
+      attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental)
+      attributes.maxRental = Number(productData.maxRental);
+
     attributes.unit = "pcs"; // Locked per your UI design
-  } 
-  else if (productData.productType === ProductType.SERVICE) {
+  } else if (productData.productType === ProductType.SERVICE) {
     // Map the UI's 'availableStock' input to 'availableUnits' for backend capacity checks
-    if (productData.availableStock) attributes.availableUnits = Number(productData.availableStock);
-    
-    if (productData.minRental) attributes.minRental = Number(productData.minRental);
-    if (productData.maxRental) attributes.maxRental = Number(productData.maxRental);
+    if (productData.availableStock)
+      attributes.availableUnits = Number(productData.availableStock);
+
+    if (productData.minRental)
+      attributes.minRental = Number(productData.minRental);
+    if (productData.maxRental)
+      attributes.maxRental = Number(productData.maxRental);
     if (productData.unit) attributes.unit = productData.unit;
   }
 
@@ -194,13 +234,19 @@ export const prepareProductFormData = (
     price: Number(productData.price),
     productType: productData.productType,
     categoryId: productData.categoryId,
-    
+
     // Ensure numbers are actually numbers, or undefined if empty
-    minOrderQty: productData.minOrderQty ? Number(productData.minOrderQty) : undefined,
-    maxOrderQty: productData.maxOrderQty ? Number(productData.maxOrderQty) : undefined,
+    minOrderQty: productData.minOrderQty
+      ? Number(productData.minOrderQty)
+      : undefined,
+    maxOrderQty: productData.maxOrderQty
+      ? Number(productData.maxOrderQty)
+      : undefined,
     qtyStep: productData.qtyStep ? Number(productData.qtyStep) : undefined,
-    deliveryFee: productData.deliveryFee ? Number(productData.deliveryFee) : undefined,
-    
+    deliveryFee: productData.deliveryFee
+      ? Number(productData.deliveryFee)
+      : undefined,
+
     isDeliveryAvailable: Boolean(productData.isDeliveryAvailable),
     locationCityIds: productData.locationCityIds || [],
     deliveryDistrictIds: productData.deliveryDistrictIds || [],
@@ -210,15 +256,15 @@ export const prepareProductFormData = (
   // ==========================================
   // 3. APPEND TO FORMDATA (Best Practices)
   // ==========================================
-  
+
   // Append JSON payload
   formData.append("product", JSON.stringify(productPayload));
-  
+
   // Append images with explicit filenames (prevents backend parsing issues)
   images.forEach((image) => {
     formData.append("images", image, image.name);
   });
-  
+
   // Append video if it exists
   if (video) {
     formData.append("video", video, video.name);
@@ -228,9 +274,7 @@ export const prepareProductFormData = (
 };
 
 // Add 'enabled' parameter with a default value of true
-export const useSearchProducts = (
-  criteria: ProductSearchCriteria,
-) => {
+export const useSearchProducts = (criteria: ProductSearchCriteria) => {
   return useQuery({
     queryKey: ["products", "search", JSON.stringify(criteria)],
     queryFn: async () => {
@@ -290,7 +334,6 @@ export const useKeywordSuggestions = (query: string) => {
   });
 };
 
-
 export const useProductCategories = () => {
   return useQuery({
     queryKey: ["categories"],
@@ -302,8 +345,6 @@ export const useProductCategories = () => {
   });
 };
 
-
-
 export const useFreshListings = () => {
   return useQuery({
     queryKey: ["products", "fresh-listings"],
@@ -314,5 +355,38 @@ export const useFreshListings = () => {
       return data.data as Page<Product>;
     },
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Update Product
+interface UpdateProductParams {
+  product: Record<string, unknown>;
+  newImages?: File[];
+  removedImageIds?: string[];   // was removedImageUrls
+  video?: File;
+  removeVideo?: boolean;
+}
+
+export const useUpdateProduct = (productId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ product, newImages, removedImageIds, video, removeVideo }: UpdateProductParams) => {
+      const formData = new FormData();
+      formData.append("product", JSON.stringify(product));
+      newImages?.forEach((file) => formData.append("newImages", file));
+      removedImageIds?.forEach((id) => formData.append("removedImageIds", id));
+      if (video) formData.append("video", video);
+      if (removeVideo) formData.append("removeVideo", "true");
+
+      const { data } = await api.put(`/products/${productId}`, formData, {
+        headers: { "Content-Type": undefined },
+      });
+      return data.data as Product;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+    },
   });
 };

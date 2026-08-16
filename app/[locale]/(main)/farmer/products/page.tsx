@@ -91,7 +91,7 @@ export default function MyProductsPage() {
 
   return (
     <>
-      <div className="container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>

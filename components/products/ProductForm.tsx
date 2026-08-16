@@ -25,6 +25,11 @@ import {
   useAllDistricts,
 } from "@/lib/api/locations";
 
+interface ExistingImage {
+  id: string;
+  url: string;
+}
+
 interface ProductFormProps {
   formData: ProductFormData;
   setFormData: (data: ProductFormData) => void;
@@ -33,6 +38,11 @@ interface ProductFormProps {
   video: File | undefined;
   setVideo: (video: File | undefined) => void;
   onNext: () => void;
+  existingImages?: ExistingImage[];
+  onRemoveExistingImage?: (url: string) => void;
+  existingVideoUrl?: string | null;
+  onRemoveExistingVideo?: () => void;
+  initialLocationNames?: Record<number, string>;
 }
 
 export function ProductForm({
@@ -43,16 +53,26 @@ export function ProductForm({
   video,
   setVideo,
   onNext,
+  existingImages = [],
+  onRemoveExistingImage,
+  existingVideoUrl,
+  onRemoveExistingVideo,
+  initialLocationNames = {},
 }: ProductFormProps) {
   const t = useTranslations("products");
   const locale = useLocale(); // Added missing locale hook
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [locationNames, setLocationNames] =
+    useState<Record<number, string>>(initialLocationNames);
+
   // Data Fetching Hooks
   const { data: categories = [] } = useCategories();
   const { data: provinces = [] } = useProvinces();
   const { data: allDistricts = [] } = useAllDistricts();
-  const { data: districts = [] } = useDistricts(formData.selectedProvinceId || null); // Added missing districts hook
+  const { data: districts = [] } = useDistricts(
+    formData.selectedProvinceId || null,
+  ); // Added missing districts hook
   const { data: cities = [] } = useCities(formData.selectedDistrictId || null);
 
   // Helper: Get context-aware labels based on product type
@@ -122,6 +142,8 @@ export function ProductForm({
     });
   };
 
+  const totalImageCount = existingImages.length + images.length;
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -169,12 +191,14 @@ export function ProductForm({
 
     if (
       formData.isDeliveryAvailable &&
-      (!formData.deliveryDistrictIds || formData.deliveryDistrictIds.length === 0)
+      (!formData.deliveryDistrictIds ||
+        formData.deliveryDistrictIds.length === 0)
     ) {
       newErrors.deliveryDistrictIds = "Select at least one delivery district";
     }
 
-    if (images.length === 0) newErrors.images = "At least one image is required";
+    if (totalImageCount === 0)
+      newErrors.images = "At least one image is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -188,17 +212,49 @@ export function ProductForm({
     <div className="space-y-8">
       {/* 1. PRODUCT TYPE SELECTION */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">1. Product Type</h2>
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          1. Product Type
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button type="button" onClick={() => setFormData({ ...formData, productType: ProductType.PHYSICAL_GOOD, unit: "" })} className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.PHYSICAL_GOOD ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}>
+          <button
+            type="button"
+            onClick={() =>
+              setFormData({
+                ...formData,
+                productType: ProductType.PHYSICAL_GOOD,
+                unit: "",
+              })
+            }
+            className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.PHYSICAL_GOOD ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}
+          >
             <Package className="w-8 h-8 mx-auto mb-2" />
             <div className="text-sm font-medium text-center">Physical Good</div>
           </button>
-          <button type="button" onClick={() => setFormData({ ...formData, productType: ProductType.RENTABLE, unit: "pcs" })} className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.RENTABLE ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}>
+          <button
+            type="button"
+            onClick={() =>
+              setFormData({
+                ...formData,
+                productType: ProductType.RENTABLE,
+                unit: "pcs",
+              })
+            }
+            className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.RENTABLE ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}
+          >
             <Wrench className="w-8 h-8 mx-auto mb-2" />
             <div className="text-sm font-medium text-center">Rentable</div>
           </button>
-          <button type="button" onClick={() => setFormData({ ...formData, productType: ProductType.SERVICE, unit: "hour" })} className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.SERVICE ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}>
+          <button
+            type="button"
+            onClick={() =>
+              setFormData({
+                ...formData,
+                productType: ProductType.SERVICE,
+                unit: "hour",
+              })
+            }
+            className={`p-6 rounded-lg border-2 transition-all ${formData.productType === ProductType.SERVICE ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-muted-foreground/50 text-muted-foreground"}`}
+          >
             <Users className="w-8 h-8 mx-auto mb-2" />
             <div className="text-sm font-medium text-center">Service</div>
           </button>
@@ -207,101 +263,280 @@ export function ProductForm({
 
       {/* 2. BASIC INFORMATION */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">2. Basic Details</h2>
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          2. Basic Details
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className="text-sm font-medium">Title *</label>
-            <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g., Fresh Organic Mangoes" />
-            {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="e.g., Fresh Organic Mangoes"
+            />
+            {errors.title && (
+              <p className="text-sm text-destructive mt-1">{errors.title}</p>
+            )}
           </div>
           <div className="md:col-span-2">
             <label className="text-sm font-medium">Description *</label>
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-3 py-2 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" rows={3} placeholder="Describe your product..." />
-            {errors.description && <p className="text-sm text-destructive mt-1">{errors.description}</p>}
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className="w-full px-3 py-2 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              rows={3}
+              placeholder="Describe your product..."
+            />
+            {errors.description && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.description}
+              </p>
+            )}
           </div>
           <div>
             <label className="text-sm font-medium">Category *</label>
             <SearchableCombobox
               options={categories.map((c) => c.name)}
-              value={categories.find((c) => c.id === formData.categoryId)?.name || ""}
+              value={
+                categories.find((c) => c.id === formData.categoryId)?.name || ""
+              }
               onChange={(selectedName) => {
-                const selectedCategory = categories.find((c) => c.name === selectedName);
-                if (selectedCategory) setFormData({ ...formData, categoryId: selectedCategory.id });
+                const selectedCategory = categories.find(
+                  (c) => c.name === selectedName,
+                );
+                if (selectedCategory)
+                  setFormData({ ...formData, categoryId: selectedCategory.id });
               }}
               placeholder="Search or select a category..."
             />
-            {errors.categoryId && <p className="text-sm text-destructive mt-1">{errors.categoryId}</p>}
+            {errors.categoryId && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.categoryId}
+              </p>
+            )}
           </div>
           <div>
             <label className="text-sm font-medium">{labels.unit}</label>
             <select
-              value={formData.productType === ProductType.RENTABLE ? "pcs" : (formData.unit || "")}
-              onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+              value={
+                formData.productType === ProductType.RENTABLE
+                  ? "pcs"
+                  : formData.unit || ""
+              }
+              onChange={(e) =>
+                setFormData({ ...formData, unit: e.target.value })
+              }
               disabled={formData.productType === ProductType.RENTABLE}
               className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed"
             >
               <option value="">Select unit</option>
-              {formData.productType === ProductType.PHYSICAL_GOOD && (<><option value="kg">Kilogram (kg)</option><option value="pcs">Pieces (pcs)</option><option value="liter">Liter</option><option value="box">Box/Crate</option></>)}
-              {formData.productType === ProductType.RENTABLE && (<option value="pcs">Pieces / Items (pcs)</option>)}
-              {formData.productType === ProductType.SERVICE && (<><option value="hour">Hour</option><option value="day">Day</option><option value="acre">Acre</option><option value="session">Session</option></>)}
+              {formData.productType === ProductType.PHYSICAL_GOOD && (
+                <>
+                  <option value="kg">Kilogram (kg)</option>
+                  <option value="pcs">Pieces (pcs)</option>
+                  <option value="liter">Liter</option>
+                  <option value="box">Box/Crate</option>
+                </>
+              )}
+              {formData.productType === ProductType.RENTABLE && (
+                <option value="pcs">Pieces / Items (pcs)</option>
+              )}
+              {formData.productType === ProductType.SERVICE && (
+                <>
+                  <option value="hour">Hour</option>
+                  <option value="day">Day</option>
+                  <option value="acre">Acre</option>
+                  <option value="session">Session</option>
+                </>
+              )}
             </select>
-            {errors.unit && <p className="text-sm text-destructive mt-1">{errors.unit}</p>}
+            {errors.unit && (
+              <p className="text-sm text-destructive mt-1">{errors.unit}</p>
+            )}
           </div>
         </div>
       </section>
 
       {/* 3. PRICING & AVAILABILITY */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">3. Pricing & Availability</h2>
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          3. Pricing & Availability
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">{labels.price} *</label>
-            <input type="number" step="0.01" min="0" value={formData.price || ""} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0.00" />
-            {errors.price && <p className="text-sm text-destructive mt-1">{errors.price}</p>}
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.price || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, price: Number(e.target.value) })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="0.00"
+            />
+            {errors.price && (
+              <p className="text-sm text-destructive mt-1">{errors.price}</p>
+            )}
           </div>
           <div>
             <label className="text-sm font-medium">{labels.stock} *</label>
-            <input type="number" step={formData.productType === ProductType.PHYSICAL_GOOD ? "0.01" : "1"} min="0" value={formData.availableStock || ""} onChange={(e) => setFormData({ ...formData, availableStock: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder={formData.productType === ProductType.PHYSICAL_GOOD ? "100" : "5"} />
-            {errors.availableStock && <p className="text-sm text-destructive mt-1">{errors.availableStock}</p>}
+            <input
+              type="number"
+              step={
+                formData.productType === ProductType.PHYSICAL_GOOD
+                  ? "0.01"
+                  : "1"
+              }
+              min="0"
+              value={formData.availableStock || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  availableStock: Number(e.target.value),
+                })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder={
+                formData.productType === ProductType.PHYSICAL_GOOD ? "100" : "5"
+              }
+            />
+            {errors.availableStock && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.availableStock}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">
-              {formData.productType === ProductType.PHYSICAL_GOOD && "Total quantity available (e.g., 100 kg)."}
-              {formData.productType === ProductType.RENTABLE && "How many items do you have to rent out? (e.g., 5 tractors)."}
-              {formData.productType === ProductType.SERVICE && "How many technicians or slots are available?"}
+              {formData.productType === ProductType.PHYSICAL_GOOD &&
+                "Total quantity available (e.g., 100 kg)."}
+              {formData.productType === ProductType.RENTABLE &&
+                "How many items do you have to rent out? (e.g., 5 tractors)."}
+              {formData.productType === ProductType.SERVICE &&
+                "How many technicians or slots are available?"}
             </p>
           </div>
 
           {formData.productType === ProductType.PHYSICAL_GOOD && (
             <div>
-              <label className="text-sm font-medium flex items-center gap-2"><Calendar className="w-4 h-4" /> Expiry Date</label>
-              <input type="date" value={formData.expiryDate || ""} onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
-              {errors.expiryDate && <p className="text-sm text-destructive mt-1">{errors.expiryDate}</p>}
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Calendar className="w-4 h-4" /> Expiry Date
+              </label>
+              <input
+                type="date"
+                value={formData.expiryDate || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, expiryDate: e.target.value })
+                }
+                className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {errors.expiryDate && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.expiryDate}
+                </p>
+              )}
             </div>
           )}
 
           {formData.productType === ProductType.RENTABLE && (
             <>
               <div>
-                <label className="text-sm font-medium">Rental Price / Day *</label>
-                <input type="number" step="0.01" min="0" value={formData.rentalPricePerDay || ""} onChange={(e) => setFormData({ ...formData, rentalPricePerDay: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0.00" />
-                {errors.rentalPricePerDay && <p className="text-sm text-destructive mt-1">{errors.rentalPricePerDay}</p>}
+                <label className="text-sm font-medium">
+                  Rental Price / Day *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.rentalPricePerDay || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      rentalPricePerDay: Number(e.target.value),
+                    })
+                  }
+                  className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="0.00"
+                />
+                {errors.rentalPricePerDay && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.rentalPricePerDay}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Security Deposit</label>
-                <input type="number" step="0.01" min="0" value={formData.depositAmount || ""} onChange={(e) => setFormData({ ...formData, depositAmount: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0.00" />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.depositAmount || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      depositAmount: Number(e.target.value),
+                    })
+                  }
+                  className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="0.00"
+                />
               </div>
             </>
           )}
 
-          {(formData.productType === ProductType.RENTABLE || formData.productType === ProductType.SERVICE) && (
+          {(formData.productType === ProductType.RENTABLE ||
+            formData.productType === ProductType.SERVICE) && (
             <>
               <div>
-                <label className="text-sm font-medium">{labels.minRental} *</label>
-                <input type="number" min="1" value={formData.minRental || ""} onChange={(e) => setFormData({ ...formData, minRental: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder={formData.productType === ProductType.RENTABLE ? "1" : "2"} />
-                {errors.minRental && <p className="text-sm text-destructive mt-1">{errors.minRental}</p>}
+                <label className="text-sm font-medium">
+                  {labels.minRental} *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.minRental || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minRental: Number(e.target.value),
+                    })
+                  }
+                  className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder={
+                    formData.productType === ProductType.RENTABLE ? "1" : "2"
+                  }
+                />
+                {errors.minRental && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.minRental}
+                  </p>
+                )}
               </div>
               <div>
-                <label className="text-sm font-medium">{labels.maxRental}</label>
-                <input type="number" min="1" value={formData.maxRental || ""} onChange={(e) => setFormData({ ...formData, maxRental: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder={formData.productType === ProductType.RENTABLE ? "30" : "8"} />
+                <label className="text-sm font-medium">
+                  {labels.maxRental}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.maxRental || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      maxRental: Number(e.target.value),
+                    })
+                  }
+                  className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder={
+                    formData.productType === ProductType.RENTABLE ? "30" : "8"
+                  }
+                />
               </div>
             </>
           )}
@@ -310,19 +545,54 @@ export function ProductForm({
 
       {/* 4. TRADING RULES */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">4. Trading Rules (Optional)</h2>
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          4. Trading Rules (Optional)
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-sm font-medium">{labels.minOrderQty}</label>
-            <input type="number" step="0.01" value={formData.minOrderQty || ""} onChange={(e) => setFormData({ ...formData, minOrderQty: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="1" />
+            <input
+              type="number"
+              step="0.01"
+              value={formData.minOrderQty || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  minOrderQty: Number(e.target.value),
+                })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="1"
+            />
           </div>
           <div>
             <label className="text-sm font-medium">{labels.maxOrderQty}</label>
-            <input type="number" step="0.01" value={formData.maxOrderQty || ""} onChange={(e) => setFormData({ ...formData, maxOrderQty: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="50" />
+            <input
+              type="number"
+              step="0.01"
+              value={formData.maxOrderQty || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  maxOrderQty: Number(e.target.value),
+                })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="50"
+            />
           </div>
           <div>
             <label className="text-sm font-medium">{labels.qtyStep}</label>
-            <input type="number" step="0.01" value={formData.qtyStep || ""} onChange={(e) => setFormData({ ...formData, qtyStep: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="1" />
+            <input
+              type="number"
+              step="0.01"
+              value={formData.qtyStep || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, qtyStep: Number(e.target.value) })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="1"
+            />
           </div>
         </div>
       </section>
@@ -330,18 +600,46 @@ export function ProductForm({
       {/* 5. DELIVERY OPTIONS */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
-          <Truck className="w-5 h-5" /> 5. {formData.productType === ProductType.SERVICE ? "Travel" : "Delivery"}
+          <Truck className="w-5 h-5" /> 5.{" "}
+          {formData.productType === ProductType.SERVICE ? "Travel" : "Delivery"}
         </h2>
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={formData.isDeliveryAvailable} onChange={(e) => setFormData({ ...formData, isDeliveryAvailable: e.target.checked })} className="w-4 h-4 rounded border-border" />
+          <input
+            type="checkbox"
+            checked={formData.isDeliveryAvailable}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                isDeliveryAvailable: e.target.checked,
+              })
+            }
+            className="w-4 h-4 rounded border-border"
+          />
           <span className="text-sm font-medium text-foreground">
-            {formData.productType === ProductType.SERVICE ? "I can travel to the customer location" : formData.productType === ProductType.RENTABLE ? "I can deliver/transport this equipment" : "I can deliver this product"}
+            {formData.productType === ProductType.SERVICE
+              ? "I can travel to the customer location"
+              : formData.productType === ProductType.RENTABLE
+                ? "I can deliver/transport this equipment"
+                : "I can deliver this product"}
           </span>
         </label>
         {formData.isDeliveryAvailable && (
           <div>
             <label className="text-sm font-medium">{labels.deliveryFee}</label>
-            <input type="number" step="0.01" min="0" value={formData.deliveryFee || ""} onChange={(e) => setFormData({ ...formData, deliveryFee: Number(e.target.value) })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0.00" />
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.deliveryFee || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  deliveryFee: Number(e.target.value),
+                })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="0.00"
+            />
           </div>
         )}
       </section>
@@ -351,37 +649,117 @@ export function ProductForm({
         <h2 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
           <MapPin className="w-5 h-5" /> 6. Product Availability Locations
         </h2>
-        <p className="text-sm text-muted-foreground">Where is this product available? Add multiple locations if needed.</p>
+        <p className="text-sm text-muted-foreground">
+          Where is this product available? Add multiple locations if needed.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-sm font-medium">Province *</label>
-            <select value={formData.selectedProvinceId || ""} onChange={(e) => setFormData({ ...formData, selectedProvinceId: Number(e.target.value) || undefined, selectedDistrictId: undefined })} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+            <select
+              value={formData.selectedProvinceId || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  selectedProvinceId: Number(e.target.value) || undefined,
+                  selectedDistrictId: undefined,
+                })
+              }
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
               <option value="">Select Province</option>
               {provinces.map((province) => (
-                <option key={province.id} value={province.id}>{formatLocationName(province.nameEn, province.nameSi, province.nameTa, locale)}</option>
+                <option key={province.id} value={province.id}>
+                  {formatLocationName(
+                    province.nameEn,
+                    province.nameSi,
+                    province.nameTa,
+                    locale,
+                  )}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
             <label className="text-sm font-medium">District *</label>
-            <select value={formData.selectedDistrictId || ""} onChange={(e) => setFormData({ ...formData, selectedDistrictId: Number(e.target.value) || undefined })} disabled={!formData.selectedProvinceId} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed">
+            <select
+              value={formData.selectedDistrictId || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  selectedDistrictId: Number(e.target.value) || undefined,
+                })
+              }
+              disabled={!formData.selectedProvinceId}
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed"
+            >
               <option value="">Select District</option>
               {districts.map((district) => (
-                <option key={district.id} value={district.id}>{formatLocationName(district.nameEn, district.nameSi, district.nameTa, locale)}</option>
+                <option key={district.id} value={district.id}>
+                  {formatLocationName(
+                    district.nameEn,
+                    district.nameSi,
+                    district.nameTa,
+                    locale,
+                  )}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
             <label className="text-sm font-medium">City *</label>
-            <select value="" onChange={(e) => { const cityId = Number(e.target.value); if (cityId && !formData.locationCityIds?.includes(cityId)) { setFormData({ ...formData, locationCityIds: [...(formData.locationCityIds || []), cityId] }); } e.target.value = ""; }} disabled={!formData.selectedDistrictId} className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed">
+            <select
+              value=""
+              onChange={(e) => {
+                const cityId = Number(e.target.value);
+                if (cityId && !formData.locationCityIds?.includes(cityId)) {
+                  const city = cities.find((c) => c.id === cityId);
+                  if (city) {
+                    const subName = city.subNames?.en || "";
+                    const displayName = subName
+                      ? `${city.nameEn} - ${subName}`
+                      : city.nameEn;
+                    setLocationNames((prev) => ({
+                      ...prev,
+                      [cityId]: formatLocationName(
+                        displayName,
+                        city.nameSi,
+                        city.nameTa,
+                        locale,
+                      ),
+                    }));
+                  }
+                  setFormData({
+                    ...formData,
+                    locationCityIds: [
+                      ...(formData.locationCityIds || []),
+                      cityId,
+                    ],
+                  });
+                }
+                e.target.value = "";
+              }}
+              disabled={!formData.selectedDistrictId}
+              className="w-full h-11 px-3 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed"
+            >
               <option value="">Select City to Add</option>
               {cities.map((city) => {
                 const subName = city.subNames?.en || "";
-                const displayName = subName ? `${city.nameEn} - ${subName}` : city.nameEn;
-                return <option key={city.id} value={city.id}>{formatLocationName(displayName, city.nameSi, city.nameTa, locale)}</option>;
+                const displayName = subName
+                  ? `${city.nameEn} - ${subName}`
+                  : city.nameEn;
+                return (
+                  <option key={city.id} value={city.id}>
+                    {formatLocationName(
+                      displayName,
+                      city.nameSi,
+                      city.nameTa,
+                      locale,
+                    )}
+                  </option>
+                );
               })}
             </select>
           </div>
@@ -391,25 +769,40 @@ export function ProductForm({
           <div className="space-y-2">
             <label className="text-sm font-medium">Selected Locations:</label>
             <div className="flex flex-wrap gap-2">
-              {formData.locationCityIds.map((cityId) => {
-                const city = cities.find((c) => c.id === cityId);
-                if (!city) return null;
-                const subName = city.subNames?.en || "";
-                const displayName = subName ? `${city.nameEn} - ${subName}` : city.nameEn;
-                return (
-                  <div key={cityId} className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{formatLocationName(displayName, city.nameSi, city.nameTa, locale)}</span>
-                    <button type="button" onClick={() => setFormData({ ...formData, locationCityIds: formData.locationCityIds?.filter((id) => id !== cityId) || [] })} className="text-destructive hover:text-destructive/80">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                );
-              })}
+              {formData.locationCityIds.map((cityId) => (
+                <div
+                  key={cityId}
+                  className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg"
+                >
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    {locationNames[cityId] || `City #${cityId}`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        locationCityIds:
+                          formData.locationCityIds?.filter(
+                            (id) => id !== cityId,
+                          ) || [],
+                      })
+                    }
+                    className="text-destructive hover:text-destructive/80"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
-        {errors.locationCityIds && <p className="text-sm text-destructive mt-1">{errors.locationCityIds}</p>}
+        {errors.locationCityIds && (
+          <p className="text-sm text-destructive mt-1">
+            {errors.locationCityIds}
+          </p>
+        )}
       </section>
 
       {/* 7. DELIVERY AREAS (District Checkboxes) */}
@@ -418,60 +811,175 @@ export function ProductForm({
           <h2 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
             <Truck className="w-5 h-5" /> 7. Delivery Coverage Areas
           </h2>
-          <p className="text-sm text-muted-foreground">Select all districts where you can deliver this product.</p>
+          <p className="text-sm text-muted-foreground">
+            Select all districts where you can deliver this product.
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {allDistricts.map((district) => (
-              <label key={district.id} className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors">
-                <input type="checkbox" checked={formData.deliveryDistrictIds?.includes(district.id) || false} onChange={(e) => {
-                  if (e.target.checked) setFormData({ ...formData, deliveryDistrictIds: [...(formData.deliveryDistrictIds || []), district.id] });
-                  else setFormData({ ...formData, deliveryDistrictIds: formData.deliveryDistrictIds?.filter((id) => id !== district.id) || [] });
-                }} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                <span className="text-sm font-medium">{formatLocationName(district.nameEn, district.nameSi, district.nameTa, locale)}</span>
+              <label
+                key={district.id}
+                className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={
+                    formData.deliveryDistrictIds?.includes(district.id) || false
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked)
+                      setFormData({
+                        ...formData,
+                        deliveryDistrictIds: [
+                          ...(formData.deliveryDistrictIds || []),
+                          district.id,
+                        ],
+                      });
+                    else
+                      setFormData({
+                        ...formData,
+                        deliveryDistrictIds:
+                          formData.deliveryDistrictIds?.filter(
+                            (id) => id !== district.id,
+                          ) || [],
+                      });
+                  }}
+                  className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
+                <span className="text-sm font-medium">
+                  {formatLocationName(
+                    district.nameEn,
+                    district.nameSi,
+                    district.nameTa,
+                    locale,
+                  )}
+                </span>
               </label>
             ))}
           </div>
-          {formData.deliveryDistrictIds && formData.deliveryDistrictIds.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">Selected: {formData.deliveryDistrictIds.length} district(s)</p>
+          {formData.deliveryDistrictIds &&
+            formData.deliveryDistrictIds.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Selected: {formData.deliveryDistrictIds.length} district(s)
+              </p>
+            )}
+          {errors.deliveryDistrictIds && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.deliveryDistrictIds}
+            </p>
           )}
-          {errors.deliveryDistrictIds && <p className="text-sm text-destructive mt-1">{errors.deliveryDistrictIds}</p>}
         </section>
       )}
 
       {/* 8. MEDIA UPLOAD */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">8. Media</h2>
-        <div>
-          <label className="text-sm font-medium mb-2 block">Product Images * (Max 5)</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {images.map((file, index) => (
-              <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                <Image src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} fill className="object-cover" />
-                <button type="button" onClick={() => setImages(images.filter((_, i) => i !== index))} className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90">
+      <div>
+        <label className="text-sm font-medium mb-2 block">
+          Product Images * (Max 5)
+        </label>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {existingImages.map((image) => (
+            <div
+              key={image.id}
+              className="relative aspect-square rounded-lg overflow-hidden border border-border"
+            >
+              <Image
+                src={image.url}
+                alt="Existing product image"
+                fill
+                className="object-cover"
+              />
+              {onRemoveExistingImage && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveExistingImage(image.id)}
+                  className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
+                >
                   <X className="w-4 h-4" />
                 </button>
-              </div>
-            ))}
-            {images.length < 5 && (
-              <label className="relative aspect-square rounded-lg border-2 border-dashed border-border hover:border-primary cursor-pointer flex flex-col items-center justify-center gap-2 transition-colors">
-                <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground text-center px-2">{images.length === 0 ? "Add Images" : "Add More"}</span>
-                <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => { const files = Array.from(e.target.files || []); setImages([...images, ...files].slice(0, 5)); }} className="hidden" />
-              </label>
-            )}
-          </div>
-          {errors.images && <p className="text-sm text-destructive mt-1">{errors.images}</p>}
+              )}
+            </div>
+          ))}
+
+          {images.map((file, index) => (
+            <div
+              key={index}
+              className="relative aspect-square rounded-lg overflow-hidden border border-border"
+            >
+              <Image
+                src={URL.createObjectURL(file)}
+                alt={`Preview ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setImages(images.filter((_, i) => i !== index))}
+                className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+
+          {totalImageCount < 5 && (
+            <label className="relative aspect-square rounded-lg border-2 border-dashed border-border hover:border-primary cursor-pointer flex flex-col items-center justify-center gap-2 transition-colors">
+              <ImageIcon className="w-8 h-8 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground text-center px-2">
+                {totalImageCount === 0 ? "Add Images" : "Add More"}
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  const remainingSlots = Math.max(0, 5 - totalImageCount);
+                  setImages([...images, ...files.slice(0, remainingSlots)]);
+                }}
+                className="hidden"
+              />
+            </label>
+          )}
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-2 block">Product Video (Optional)</label>
+          <label className="text-sm font-medium mb-2 block">
+            Product Video (Optional)
+          </label>
+
+          {existingVideoUrl && !video && (
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg mb-3">
+              <Video className="w-8 h-8 text-primary" />
+              <p className="flex-1 text-sm font-medium text-foreground">
+                Current video attached
+              </p>
+              {onRemoveExistingVideo && (
+                <button
+                  type="button"
+                  onClick={onRemoveExistingVideo}
+                  className="p-2 hover:bg-background rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+          )}
+
           {video ? (
             <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
               <Video className="w-8 h-8 text-primary" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{video.name}</p>
-                <p className="text-xs text-muted-foreground">{(video.size / 1024 / 1024).toFixed(2)} MB</p>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {video.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(video.size / 1024 / 1024).toFixed(2)} MB
+                </p>
               </div>
-              <button type="button" onClick={() => setVideo(undefined)} className="p-2 hover:bg-background rounded-lg transition-colors">
+              <button
+                type="button"
+                onClick={() => setVideo(undefined)}
+                className="p-2 hover:bg-background rounded-lg transition-colors"
+              >
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
@@ -479,16 +987,41 @@ export function ProductForm({
             <label className="flex items-center gap-3 p-4 border-2 border-dashed border-border rounded-lg hover:border-primary cursor-pointer transition-colors">
               <Upload className="w-6 h-6 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-foreground">Upload Video</p>
-                <p className="text-xs text-muted-foreground">MP4, MOV. Max 50MB</p>
+                <p className="text-sm font-medium text-foreground">
+                  {existingVideoUrl ? "Replace Video" : "Upload Video"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  MP4, MOV. Max 50MB
+                </p>
               </div>
-              <input type="file" accept="video/mp4,video/quicktime" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (file.size > 50 * 1024 * 1024) { alert("Video must be less than 50MB"); return; } setVideo(file); } }} className="hidden" />
+              <input
+                type="file"
+                accept="video/mp4,video/quicktime"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 50 * 1024 * 1024) {
+                      alert("Video must be less than 50MB");
+                      return;
+                    }
+                    setVideo(file);
+                  }
+                }}
+                className="hidden"
+              />
             </label>
           )}
         </div>
-      </section>
+        {errors.images && (
+          <p className="text-sm text-destructive mt-1">{errors.images}</p>
+        )}
+      </div>
 
-      <button type="button" onClick={handleNext} className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-colors">
+      <button
+        type="button"
+        onClick={handleNext}
+        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-colors"
+      >
         Continue to Review
       </button>
     </div>
