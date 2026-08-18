@@ -14,25 +14,83 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { RevenueChart } from "@/components/charts/RevenueChart";
 import { OrderVolumeChart } from "@/components/charts/OrderVolumeChart";
 import { RecentOrdersWidget } from "@/components/dashboard/RecentOrdersWidget";
 import { TopProductsWidget } from "@/components/dashboard/TopProductsWidget";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function FarmerDashboardPage() {
-  const { data: stats, isLoading, isError } = useFarmerDashboardStats();
+  const { user, isHydrated } = useAuthStore();
+  const router = useRouter();
+  const locale = useLocale();
+
+  const isFarmer = user?.role === "FARMER";
+
+  const {
+    data: stats,
+    isLoading,
+    isError,
+  } = useFarmerDashboardStats({
+    enabled: isHydrated && isFarmer,
+  });
+
   const {
     data: monthlyStats,
     isLoading: isMonthlyStatsLoading,
     isError: isMonthlyStatsError,
-  } = useFarmerMonthlyStats();
+  } = useFarmerMonthlyStats({
+    enabled: isHydrated && isFarmer,
+  });
 
-  // Loading State
-  if (isLoading) {
+  // Wait until auth state has been restored.
+  if (!isHydrated) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "FARMER") {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+        <div className="w-full max-w-md rounded-2xl bg-background border border-border shadow-2xl p-8 text-center">
+          {/* Icon */}
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <Package className="h-8 w-8 text-primary" />
+          </div>
+
+          {/* Content */}
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            Farmer Registration Required
+          </h2>
+
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            This dashboard is available only to registered farmers. Please
+            register as a farmer to continue.
+          </p>
+
+          {/* Actions */}
+          <div className="mt-7 flex gap-3">
+            <Link
+              href={`/${locale}/register`}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              Register as Farmer
+            </Link>
+
+            <Link
+              href={`/${locale}`}
+              className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              Back to Home
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

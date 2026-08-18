@@ -11,31 +11,52 @@ export interface FarmerDashboardStats {
   averageRating: number;
 }
 
-export const useFarmerDashboardStats = () => {
+export const useFarmerDashboardStats = (
+  options?: {
+    enabled?: boolean;
+  }
+) => {
   return useQuery({
-    queryKey: ['farmer', 'analytics', 'dashboard'],
+    queryKey: ["farmer", "analytics", "dashboard"],
     queryFn: async () => {
-      const { data } = await api.get('/farmer/analytics/dashboard');
+      const { data } = await api.get("/farmer/analytics/dashboard");
       return data.data as FarmerDashboardStats;
     },
-    // Cache for 5 minutes on the client side to match backend caching
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
+    enabled: options?.enabled ?? true,
   });
 };
 
 import { MonthlyStat } from "@/types/analytics";
 
-export const useFarmerMonthlyStats = () => {
+// export const useFarmerMonthlyStats = () => {
+//   return useQuery({
+//     queryKey: ["farmer", "analytics", "monthly-stats"],
+//     queryFn: async () => {
+//       const { data } = await api.get("/farmer/analytics/monthly-stats");
+//       return data.data as MonthlyStat[];
+//     },
+//     staleTime: 1000 * 60 * 5,
+//   });
+// };
+
+
+
+export const useFarmerMonthlyStats = (
+  options?: {
+    enabled?: boolean;
+  }
+) => {
   return useQuery({
-    queryKey: ["farmer", "analytics", "monthly-stats"],
+     queryKey: ["farmer", "analytics", "monthly-stats"],
     queryFn: async () => {
       const { data } = await api.get("/farmer/analytics/monthly-stats");
       return data.data as MonthlyStat[];
     },
     staleTime: 1000 * 60 * 5,
+    enabled: options?.enabled ?? true,
   });
 };
-
 
 export const useFarmerRecentOrders = () => {
   return useQuery({

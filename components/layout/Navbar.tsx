@@ -22,7 +22,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: `/${locale}`, label: t("home") },
-    { href: `/${locale}/products`, label: t("browse") },
+    { href: `/${locale}/search`, label: t("browse") },
     { href: `/${locale}/farmer/dashboard`, label: t("forFarmers") },
   ];
 

@@ -55,9 +55,9 @@ export default function LoginPage() {
         if (user.role === "ADMIN") {
           router.push(`/${locale}/admin`);
         } else if (user.role === "FARMER") {
-          router.push(`/${locale}/dashboard/farmer`);
+          router.push(`/${locale}/farmer/dashboard`);
         } else {
-          router.push(`/${locale}/dashboard/buyer`);
+          router.push(`/${locale}`);
         }
       }
     } catch (error: any) {

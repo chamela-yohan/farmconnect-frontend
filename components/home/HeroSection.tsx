@@ -25,14 +25,14 @@ export function HeroSection() {
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
               <Link
-                href={`/${locale}/products`}
+                href={`/${locale}/search`}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
               >
                 {t("heroCtaBrowse")}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href={`/${locale}/farmer/dashboard`}
+                href={`/${locale}/register`}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-card border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors"
               >
                 {t("heroCtaSell")}

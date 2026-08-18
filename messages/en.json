@@ -195,5 +195,12 @@
       "back": "Back",
       "submit": "Submit Product"
     }
+  },
+  "farmerNav": {
+    "dashboard": "Dashboard",
+    "myProducts": "My Products",
+    "orders": "Orders",
+    "menuTrigger": "Farmer Menu",
+    "workspaceLabel": "Farmer Workspace"
   }
 }
