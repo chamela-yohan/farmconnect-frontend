@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, ShieldAlert, LogOut, FileCheck } from "lucide-react";
+import { LayoutDashboard, Users, ShieldAlert, LogOut, FileCheck, Package } from "lucide-react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export default function AdminLayout({
   children,
@@ -10,8 +11,9 @@ export default function AdminLayout({
     <div className="flex min-h-screen bg-background">
       {/* Sidebar - Hidden on mobile, visible on desktop */}
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card">
-        <div className="p-6">
+        <div className="p-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary">FarmConnect Admin</h1>
+          <ThemeToggle />
         </div>
         <nav className="flex-1 space-y-2 px-4">
           <Link
@@ -30,6 +32,14 @@ export default function AdminLayout({
           </Link>
 
           <Link
+            href="/admin/products"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Package className="w-5 h-5" />
+            Product Management
+          </Link>
+
+          <Link
             href="/admin/kyc"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
@@ -45,7 +55,7 @@ export default function AdminLayout({
           </Link>
         </nav>
         <div className="p-4 border-t border-border">
-          <button className="flex items-center gap-3 w-full rounded-lg px-3 py-2 text-red-500 hover:bg-red-50 transition-colors">
+          <button className="flex items-center gap-3 w-full rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10 transition-colors">
             <LogOut className="w-5 h-5" />
             Logout
           </button>
@@ -57,7 +67,7 @@ export default function AdminLayout({
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
           <h1 className="text-lg font-bold text-primary">Admin Panel</h1>
-          {/* Add a mobile menu button here if needed */}
+          <ThemeToggle />
         </header>
 
         <div className="p-6 md:p-8">{children}</div>

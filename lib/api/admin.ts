@@ -1,7 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 import { MonthlyStat } from "@/types/analytics";
+import { AdminProductSummary } from "@/types/admin";
+import { Page } from "@/types/common";
 
 export interface AdminUser {
   id: string;
@@ -24,7 +26,7 @@ export interface AdminDashboardStats {
 
 export const useAdminUsers = (page = 0, size = 20) => {
   return useQuery({
-    queryKey: ['admin', 'users', page, size],
+    queryKey: ["admin", "users", page, size],
     queryFn: async () => {
       const { data } = await api.get(`/admin/users?page=${page}&size=${size}`);
       return data.data; // This will be a Page<AdminUser>
@@ -41,11 +43,11 @@ export const useToggleUserStatus = () => {
     },
     onSuccess: () => {
       toast.success("User status updated successfully");
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update user");
-    }
+    },
   });
 };
 
@@ -58,11 +60,10 @@ export const useVerifyFarmer = () => {
     },
     onSuccess: () => {
       toast.success("Farmer verified successfully");
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
     },
   });
 };
-
 
 export const useAdminDashboardStats = () => {
   return useQuery({
@@ -84,5 +85,43 @@ export const useAdminMonthlyStats = () => {
     },
     staleTime: 1000 * 60 * 5,
     retry: 1,
+  });
+};
+
+export const useAdminProducts = (
+  search: string,
+  page: number,
+  size: number = 10,
+) => {
+  return useQuery({
+    queryKey: ["admin", "products", search, page, size],
+    queryFn: async () => {
+      const { data } = await api.get("/admin/moderation/products", {
+        params: { search: search || undefined, page, size },
+      });
+      return data.data as Page<AdminProductSummary>;
+    },
+    placeholderData: (previousData) => previousData, // keeps the current page visible while the next loads instead of flashing to a spinner
+  });
+};
+
+export const useToggleProductVisibility = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      productId,
+      hide,
+    }: {
+      productId: string;
+      hide: boolean;
+    }) => {
+      await api.put(
+        `/admin/moderation/products/${productId}/${hide ? "hide" : "restore"}`,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+    },
   });
 };
